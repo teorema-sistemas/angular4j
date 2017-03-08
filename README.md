@@ -16,4 +16,6 @@ With the help of the free software community, the Teorema Sistemas seeks to deve
 - Event Driven, Real Time, and lightweight.
 - Date in native format over server side and client side.
 - Byte[] format over server side and Base64 on client side.
+- Inheritance in annotation.
+- Generic attributes in methods.
 - Transition of compressed and encrypted data.
