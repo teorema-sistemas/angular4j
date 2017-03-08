@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jboss-deployment-structure>
+	<deployment>
+		<dependencies>
+			<module name="ext.library" />
+			<system export="true">
+				<paths>
+					<path name="sun/security/mscapi" />
+				</paths>
+			</system>
+		</dependencies>
+	</deployment>	
+</jboss-deployment-structure>

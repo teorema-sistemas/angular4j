@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<project name="build-abstract-angular4j" basedir="./" default="default">
+
+	<target name="default">
+
+		<echo>removendo abstractangular4j.jar caso exista...</echo>
+		<delete file="jar/abstractangular4j.jar" />
+
+		<echo>gerando arquivo abstractangular4j.jar...</echo>
+		<jar file="jar/abstractangular4j.jar" update="true" compress="true">
+			<zipfileset dir="./bin/angular4J/api" prefix="angular4J/api" includes="**/NG*.class" />
+			<zipfileset dir="./bin/angular4J/api/http" prefix="angular4J/api/http" includes="**/*.class" />
+			<zipfileset dir="./bin/angular4J/util" prefix="angular4J/util" includes="**/Constants.class" />
+			<zipfileset dir="./bin/angular4J/util" prefix="angular4J/util" includes="**/ModelQuery.class" />
+			<zipfileset dir="./bin/angular4J/util" prefix="angular4J/util" includes="**/NGBytesBase.class" />
+			<zipfileset dir="./bin/angular4J/util" prefix="angular4J/util" includes="**/NGLob.class" />
+			<zipfileset dir="./bin/angular4J/util" prefix="angular4J/util" includes="**/NGBase64.class" />
+			<zipfileset dir="./bin/angular4J/util" prefix="angular4J/util" includes="**/NGParamType.class" />
+		</jar>
+	</target>
+</project>

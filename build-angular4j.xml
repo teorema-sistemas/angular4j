@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<project name="build-angular4j" basedir="./" default="default">
+
+	<target name="default">
+
+		<echo>removendo angular4j.jar caso exista...</echo>
+		<delete file="jar/angular4j.jar" />
+
+		<echo>gerando arquivo angular4j.jar...</echo>
+		<jar file="jar/angular4j.jar" update="true" compress="true">
+			<zipfileset dir="./bin" includes="**/*.class" />
+			<zipfileset dir="./src" includes="**/*.js" />
+			<zipfileset dir="./src/META-INF" prefix="META-INF" includes="**/*.*" />
+		</jar>
+	</target>
+</project>
