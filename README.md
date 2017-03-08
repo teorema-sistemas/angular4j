@@ -14,4 +14,6 @@ With the help of the free software community, the Teorema Sistemas seeks to deve
 - Events and queryModels broadcast.
 - Built in i18n Translation.
 - Event Driven, Real Time, and lightweight.
+- Date in native format over server side and client side.
+- Byte[] format over server side and Base64 on client side.
 - Transition of compressed and encrypted data.
