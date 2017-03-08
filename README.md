@@ -17,5 +17,5 @@ With the help of the free software community, the Teorema Sistemas seeks to deve
 - Date in native format over server side and client side.
 - Byte[] format over server side and Base64 on client side.
 - Inheritance in annotation.
-- Generic attributes in methods.
+- Work with generic attributes in method.
 - Transition of compressed and encrypted data.
