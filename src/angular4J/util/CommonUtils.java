@@ -222,21 +222,6 @@ public abstract class CommonUtils {
       return false;
    }
 
-   /***
-    * Returns the type of bind to convert byte[] - LOB (current format) / BASE64
-    *
-    * @return String "LOB" or "BASE64"
-    */
-   public static String getBytesArrayBind() {
-      String bytesArrayBind = Constants.LOB_BIND;
-      if (NGConfig.getProperty("BYTES_ARRAY_BIND") != null) {
-         if (NGConfig.getProperty("BYTES_ARRAY_BIND").trim().equals(Constants.BASE64_BIND)) {
-            bytesArrayBind = Constants.BASE64_BIND;
-         }
-      }
-      return bytesArrayBind;
-   }
-
    /**
     * Returns the full path of the server context
     * 

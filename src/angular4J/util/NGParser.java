@@ -165,14 +165,12 @@ public class NGParser implements Serializable {
    }
 
    public void initJsonSerialiser() {
-
       GsonBuilder builder = new GsonBuilder();
 
       builder.serializeNulls();
 
       builder.setExclusionStrategies(NGConfig.getGsonExclusionStrategy());
 
-      // --- BYTE[] BLOCK BEGIN ---
       builder.registerTypeAdapter(NGLob.class, new ByteArrayJsonAdapter());
 
       builder.registerTypeAdapter(NGBase64.class, new JsonSerializer<NGBase64>(){
@@ -198,29 +196,22 @@ public class NGParser implements Serializable {
          }
       });
 
-      if (CommonUtils.getBytesArrayBind().equals(Constants.BASE64_BIND)) {
-         builder.registerTypeAdapter(byte[].class, new JsonSerializer<byte[]>(){
+      builder.registerTypeAdapter(byte[].class, new JsonSerializer<byte[]>(){
 
-            @Override
-            public JsonElement serialize(byte[] src, Type typeOfSrc, JsonSerializationContext context) {
-               return getBase64Json(null, src);
-            }
-         });
+         @Override
+         public JsonElement serialize(byte[] src, Type typeOfSrc, JsonSerializationContext context) {
+            return getBase64Json(null, src);
+         }
+      });
 
-         builder.registerTypeAdapter(byte[].class, new JsonDeserializer<byte[]>(){
+      builder.registerTypeAdapter(byte[].class, new JsonDeserializer<byte[]>(){
 
-            @Override
-            public byte[] deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
-               return getBytesFromJson(element);
-            }
-         });
+         @Override
+         public byte[] deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
+            return getBytesFromJson(element);
+         }
+      });
 
-      } else {
-         builder.registerTypeAdapter(byte[].class, new ByteArrayJsonAdapter());
-      }
-      // --- BYTE[] BLOCK END ---
-
-      // --- DATE FORMAT BLOCK BEGIN ---
       final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
       if (dateFormat != null && NGConfig.getProperty("TIME_ZONE") != null) {
@@ -368,8 +359,6 @@ public class NGParser implements Serializable {
          }
 
       });
-
-      // --- DATE FORMAT BLOCK END ---
 
       mainSerializer = builder.create();
    }

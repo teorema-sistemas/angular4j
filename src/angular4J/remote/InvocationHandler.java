@@ -215,7 +215,7 @@ public class InvocationHandler implements Serializable {
                      clazz = CommonUtils.getWrapperClass(typeString);
                   }
 
-                  if (clazz.equals(byte[].class) && CommonUtils.getBytesArrayBind().equals(Constants.BASE64_BIND)) {
+                  if (clazz.equals(byte[].class)) {
                      type = clazz;
                   }
 
