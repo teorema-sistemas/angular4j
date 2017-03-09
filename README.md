@@ -1,5 +1,3 @@
-# Angular4J
-
 ![Angular4J_Logo](https://cloud.githubusercontent.com/assets/26282859/23752270/74a4dcfa-04b3-11e7-9500-e373034e47f7.png "Angular4J Logo")
 
 Angular4J is a framework whose intention is to use JavaEE7 -and more precisely the CDI specification- with AngularJS. 
