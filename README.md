@@ -21,3 +21,16 @@ With the help of the free software community, the Teorema Sistemas seeks to deve
 - Inheritance in annotation.
 - Work with generic attributes in method.
 - Transition of compressed and encrypted data.
+
+## Teorema Angular4J Team
+```Sh
+Gustavo Ribas    - General Manager - gustavo@teorema.inf.br
+
+Osni Marin       - Team Leader/System Architect - osni@teorema.inf.br (https://github.com/osnimarin)
+
+Felipe Weiber    - Developer - felipe.weiber@teorema.inf.br (https://github.com/fweiber)
+Julio Fabiane    - Developer - julio@teorema.inf.br (https://github.com/juliofabiane) 
+Rafael Reynoud   - Developer - rafael@teorema.inf.br (https://github.com/rafareypy)
+
+Jonathan Delgado - Designer - marketing@teorema.inf.br
+````
