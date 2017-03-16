@@ -26,8 +26,8 @@ public class GlobalNGSessionContextsHolder {
       return instance;
    }
 
-   public void destroySession(String holderId) {
-      this.sessions.remove(holderId);
+   public boolean hasSession(String holderId) {
+      return this.sessions.containsKey(holderId);
    }
 
    public NGSessionContextHolder getSession(String holderId) {
@@ -35,5 +35,9 @@ public class GlobalNGSessionContextsHolder {
          this.sessions.put(holderId, new NGSessionContextHolder());
       }
       return this.sessions.get(holderId);
+   }
+
+   public void destroySession(String holderId) {
+      this.sessions.remove(holderId);
    }
 }

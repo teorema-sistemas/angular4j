@@ -9,8 +9,8 @@ import javax.inject.Inject;
 
 import com.google.gson.JsonObject;
 
-import angular4J.context.BeanLocator;
 import angular4J.context.NGSessionScopeContext;
+import angular4J.context.NGLocator;
 
 /**
  * Realtime remote calls handler
@@ -38,8 +38,8 @@ public class RealTimeInvoker implements Serializable {
          return;
       }
 
-      Object bean = BeanLocator.getInstance().lookup(beanName, UID);
+      Object model = NGLocator.getInstance().lookup(beanName, UID);
 
-      remoteInvoker.realTimeInvoke(bean, method, paramsObj, event, reqId, UID);
+      remoteInvoker.realTimeInvoke(model, method, paramsObj, event, reqId, UID);
    }
 }

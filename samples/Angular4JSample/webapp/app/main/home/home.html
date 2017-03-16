@@ -1,0 +1,50 @@
+<div class="row">
+	<div class="col-lg-12">
+		<div class="text-center">
+			<img style="width: 600px" ng-src="{{vm.imageAngular4j}}" alt="">
+		</div>				
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-lg-8" style="padding-left: 0">
+		<div class="form-group col-lg-12" style="padding-left: 0">
+			<label for="created">Created by</label>
+			<input ng-model="vm.info.created" type="text" class="form-control" id="created" aria-describedby="" placeholder="">
+		</div>
+	</div>
+	<div class="col-lg-4" style="padding: 0">
+		<div class="form-group col-lg-12" style="padding: 0">
+			<label for="created">In</label>
+			<input ui-mask="99/99/9999 99:99:99" ng-model="vm.date" type="text" class="form-control" id="created" aria-describedby="" placeholder="">
+		</div>
+	</div>
+</div>
+<div class="row well" style="background-color: #FFF">
+	<div class="col-lg-12" style="padding: 0">
+		<div class="form-group col-lg-12" style="padding: 0">
+			<div class="hidden">
+				<input type="file" id="logo" ng-file-select="logo" class="btn btn-info">
+			</div>
+			<label for="logo" class="btn btn-primary" style="cursor: pointer;">Change image</label>
+			<button ng-click="vm.removeImage()" class="btn btn-danger">Clear image</button>
+			<button ng-click="vm.downloadImage()" class="btn btn-success">Download image</button>
+        </div>
+	</div>
+
+	<div class="col-lg-12">
+		<div class="text-center">
+			<img style="width: 400px" ng-src="{{vm.info.image.getPngImage()}}" alt="" ng-if="vm.info.image">
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-lg-12" style="padding: 0">
+		<div class="form-group col-lg-12 text-right" style="padding: 0">
+			<button ng-click="vm.restore()" class="btn btn-success">Restore</button>
+			<button ng-click="vm.reload()" class="btn btn-info">Reload</button>
+			<button ng-click="vm.submit()" class="btn btn-primary">Submit</button>
+        </div>
+	</div>
+</div>

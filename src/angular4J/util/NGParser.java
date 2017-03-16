@@ -164,6 +164,40 @@ public class NGParser implements Serializable {
       return o;
    }
 
+   public Object deserialiseFromString(String value, Class<?> type) {
+      if (value == null) {
+         return null;
+      }
+
+      if (String.class.equals(type)) {
+         return value;
+      }
+
+      if (type.equals(int.class) || type.equals(Integer.class)) {
+         return Integer.parseInt(value);
+      }
+      if (type.equals(float.class) || type.equals(Float.class)) {
+         return Float.parseFloat(value);
+      }
+      if (type.equals(boolean.class) || type.equals(Boolean.class)) {
+         return Boolean.parseBoolean(value);
+      }
+      if (type.equals(double.class) || type.equals(Double.class)) {
+         return Double.parseDouble(value);
+      }
+      if (type.equals(byte.class) || type.equals(Byte.class)) {
+         return Byte.parseByte(value);
+      }
+      if (type.equals(long.class) || type.equals(Long.class)) {
+         return Long.parseLong(value);
+      }
+      if (type.equals(short.class) || type.equals(Short.class)) {
+         return Short.parseShort(value);
+      }
+
+      throw new IllegalArgumentException("unknown primitive type :" + type.getCanonicalName());
+   }
+
    public void initJsonSerialiser() {
       GsonBuilder builder = new GsonBuilder();
 
@@ -212,7 +246,7 @@ public class NGParser implements Serializable {
          }
       });
 
-      final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+      final SimpleDateFormat dateFormat = new SimpleDateFormat("'" + Constants.DATA_MARK + Constants.DATE_UTC_MARK + "'yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
       if (dateFormat != null && NGConfig.getProperty("TIME_ZONE") != null) {
          dateFormat.setTimeZone(TimeZone.getTimeZone(NGConfig.getProperty("TIME_ZONE")));

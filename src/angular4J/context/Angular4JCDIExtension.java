@@ -14,7 +14,7 @@ import javax.enterprise.inject.spi.WithAnnotations;
 
 import angular4J.api.Angular4J;
 import angular4J.api.NGApp;
-import angular4J.boot.BeanRegistry;
+import angular4J.boot.NGRegistry;
 import angular4J.ngservices.NGExtension;
 import angular4J.ngservices.NGService;
 
@@ -31,10 +31,10 @@ import angular4J.ngservices.NGService;
 public class Angular4JCDIExtension implements Extension {
 
    /**
-    * Observes the ProcessAnnotatedType event and register scanned ng4J specific CDI beans to the
-    * BeanRegistry.
+    * Observes the ProcessAnnotatedType event and register scanned ng4J specific CDI models to the
+    * NGRegistry.
     * 
-    * @see BeanRegistry
+    * @see NGRegistry
     * @param processAnnotatedType
     */
    public <T> void processAnnotatedType(@Observes @WithAnnotations(value = {Angular4J.class, NGExtension.class, NGApp.class}) ProcessAnnotatedType<T> processAnnotatedType) {
@@ -46,14 +46,14 @@ public class Angular4JCDIExtension implements Extension {
 
       // Handle @Angular4J annotated components
       if (annotatedType.isAnnotationPresent(Angular4J.class)) {
-         BeanRegistry.getInstance().registerBean(typeClass);
+         NGRegistry.getInstance().registerNGModel(typeClass);
          return;
       }
 
       // Handle @NGExtension annotated components
       if (annotatedType.isAnnotationPresent(NGExtension.class)) {
          try {
-            BeanRegistry.getInstance().registerExtention((NGService) annotatedType.getJavaClass().newInstance());
+            NGRegistry.getInstance().registerNGService((NGService) annotatedType.getJavaClass().newInstance());
             return;
          }
          catch (InstantiationException | IllegalAccessException e) {
@@ -63,13 +63,13 @@ public class Angular4JCDIExtension implements Extension {
 
       // Handle @NGApp annotated components
       if (annotatedType.isAnnotationPresent(NGApp.class)) {
-         BeanRegistry.getInstance().registerApp(typeClass);
+         NGRegistry.getInstance().registerApp(typeClass);
       }
    }
 
    /**
     * <p>
-    * Invoked by the container once all the annotated types has bean discovered, then registers the
+    * Invoked by the container once all the annotated types has model discovered, then registers the
     * NGSessionScopeContext (and the NGSessionScoped custom CDI scope)
     * </p>
     * 

@@ -8,6 +8,10 @@ import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 
+import org.boon.Pair;
+
+import angular4J.util.Constants;
+
 /**
  * 
  * A custom CDI context implementation bound to the NGSession (cross context between the Websockets
@@ -18,7 +22,7 @@ public class NGSessionScopeContext implements Context, Serializable {
 
    private static NGSessionScopeContext instance;
 
-   private ThreadLocal<NGSessionContextHolder> holder = new ThreadLocal<>();
+   private ThreadLocal<Pair<String, NGSessionContextHolder>> holder = new ThreadLocal<>();
 
    private NGSessionScopeContext() {}
 
@@ -33,8 +37,12 @@ public class NGSessionScopeContext implements Context, Serializable {
       return instance;
    }
 
-   public void setCurrentContext(String sessionId) {
-      this.holder.set(GlobalNGSessionContextsHolder.getInstance().getSession(sessionId));
+   public void setCurrentContext(String sessionID) {
+      this.holder.set(new Pair(sessionID, GlobalNGSessionContextsHolder.getInstance().getSession(sessionID)));
+   }
+
+   public String getCurrentSessionID() {
+      return this.holder.get().getKey();
    }
 
    @Override
@@ -49,8 +57,8 @@ public class NGSessionScopeContext implements Context, Serializable {
       }
 
       Bean bean = (Bean) contextual;
-      if (this.holder.get().getBeans().containsKey(bean.getBeanClass())) {
-         return (T) this.holder.get().getBean(bean.getBeanClass()).getInstance();
+      if (this.holder.get().getValue().getBeans().containsKey(bean.getBeanClass())) {
+         return (T) this.holder.get().getValue().getBean(bean.getBeanClass()).getInstance();
       } else {
 
          T instance = (T) bean.create(creationalContext);
@@ -60,7 +68,7 @@ public class NGSessionScopeContext implements Context, Serializable {
          customScope.setCtx(creationalContext);
          customScope.setInstance(instance);
 
-         this.holder.get().putBean(customScope);
+         this.holder.get().getValue().putBean(customScope);
 
          return instance;
       }
@@ -70,8 +78,8 @@ public class NGSessionScopeContext implements Context, Serializable {
    public <T> T get(Contextual<T> contextual) {
       Bean bean = (Bean) contextual;
 
-      if (this.holder.get().getBeans().containsKey(bean.getBeanClass())) {
-         return (T) this.holder.get().getBean(bean.getBeanClass()).getInstance();
+      if (this.holder.get().getValue().getBeans().containsKey(bean.getBeanClass())) {
+         return (T) this.holder.get().getValue().getBean(bean.getBeanClass()).getInstance();
       } else {
          return null;
       }
@@ -80,5 +88,13 @@ public class NGSessionScopeContext implements Context, Serializable {
    @Override
    public boolean isActive() {
       return true;
+   }
+
+   public final boolean isScopeSession() {
+      return !this.getCurrentSessionID().equals(Constants.GENERATE_SESSION_ID);
+   }
+
+   public final boolean isGenerateSession() {
+      return this.getCurrentSessionID().equals(Constants.GENERATE_SESSION_ID);
    }
 }

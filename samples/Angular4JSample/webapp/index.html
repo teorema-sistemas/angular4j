@@ -1,0 +1,65 @@
+<!doctype html>
+<html ng-app="appAngular">
+<head>
+	<base href="/angular4j-sample/">
+
+	<meta charset="utf-8">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Angular4J Sample</title>       
+    
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+
+
+
+    <style>
+        .navbar { border-radius:0; }
+    </style>
+</head>
+
+<body ng-controller="IndexController as vm">
+	<div ui-view="main"></div>
+	
+    <script src="assets/js/jquery-2.1.1.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/moment-with-locales.js"></script>
+    
+	<script src="assets/js/angular.min.js"></script>
+    <script src="assets/js/angular-ui-router.min.js"></script>
+    <script src="assets/js/angular-animate.min.js"></script>
+    <script src="assets/js/angular-sanitize.min.js"></script>
+    <script src="assets/js/mask.js"></script>
+
+    <!-- Angular4J Inject-->
+    <script src="ng4j.js"></script>
+<!--     <script type="text/javascript" src="assets/js/angular4j-utils.js"></script> -->
+    
+    <script src="app/index.module.js"></script>
+    <script src="app/index.run.js"></script>
+    <script src="app/index.route.js"></script>
+    <script src="app/index.controller.js"></script>
+    <script src="app/index.constants.js"></script>
+    <script src="app/main/main.controller.js"></script>
+
+    <script src="app/core/core.module.js"></script>
+    <script src="app/core/core.run.js"></script>
+    <script src="app/core/core.config.js"></script>    
+
+    <script src="app/core/directives/ng-file-select/ng-file-select.js"></script>
+    <script src="app/core/services/file-reader.service.js"></script>
+    
+    <script src="app/main/home/home.module.js"></script>
+    <script src="app/main/home/home.controller.js"></script>
+
+    <script src="app/main/team/team.module.js"></script>
+    <script src="app/main/team/team.controller.js"></script>
+    
+    <script src="app/main/about/about.module.js"></script>
+    <script src="app/main/about/about.controller.js"></script>
+    
+    <script src="app/main/login/login.module.js"></script>
+    <script src="app/main/login/login.controller.js"></script>
+</body>
+</html>

@@ -8,8 +8,8 @@ import java.lang.reflect.Method;
 
 import javax.inject.Named;
 
-import angular4J.boot.BeanRegistry;
-import angular4J.context.BeanHolder;
+import angular4J.boot.NGRegistry;
+import angular4J.context.NGHolder;
 import angular4J.ngservices.NGService;
 
 /**
@@ -46,7 +46,7 @@ public class DefaultJsCacheLoader extends JsLoader {
          e.printStackTrace();
       }
 
-      Class<? extends Object> appClass = BeanRegistry.getInstance().getAppClass();
+      Class<? extends Object> appClass = NGRegistry.getInstance().getAppClass();
       String appName = getAppName(appClass);
       JsCache.getInstance().appendToCore(new StringBuilder(String.format("var app=angular.module('%s', [", appName)));
       JsCache.getInstance().appendToCore(new StringBuilder("]).run(function($rootScope) {$rootScope.sessionUID = sessionId;"));
@@ -56,7 +56,7 @@ public class DefaultJsCacheLoader extends JsLoader {
    @Override
    public void LoadExtensions() {
       StringBuilder builder = new StringBuilder();
-      for (NGService extention: BeanRegistry.getInstance().getExtentions()) {
+      for (NGService extention: NGRegistry.getInstance().getNGServices()) {
          Method m;
          try {
             m = extention.getClass().getMethod("render");
@@ -76,7 +76,7 @@ public class DefaultJsCacheLoader extends JsLoader {
       }
 
       if ((appName == null) || (appName.length() < 1)) {
-         appName = BeanHolder.getInstance().getName(appClass);
+         appName = NGHolder.getInstance().getName(appClass);
       }
       return appName;
    }

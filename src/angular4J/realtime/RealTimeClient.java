@@ -13,10 +13,10 @@ import java.util.Set;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import angular4J.boot.BeanRegistry;
-import angular4J.context.BeanHolder;
+import angular4J.boot.NGRegistry;
 import angular4J.context.NGSessionScoped;
 import angular4J.context.SessionMapper;
+import angular4J.context.NGHolder;
 import angular4J.events.BroadcastManager;
 import angular4J.events.RealTimeMessage;
 import angular4J.events.RealTimeSessionCloseEvent;
@@ -28,8 +28,8 @@ import angular4J.remote.RealTimeDataReceivedEvent;
 import angular4J.sockjs.SockJsConnection;
 import angular4J.util.ModelQuery;
 import angular4J.util.ModelQueryImpl;
-import angular4J.util.NGBean;
 import angular4J.util.NGParser;
+import angular4J.util.NGObject;
 
 /**
  * when injected, a realTime client represent the current real time session (websocket or fallback
@@ -62,12 +62,12 @@ public class RealTimeClient implements Serializable {
       GlobalConnectionHolder.getInstance().getConnections().add(event.getConnection());
       sessions.add(event.getConnection());
 
-      List<NGBean> nGBeans = BeanRegistry.getInstance().getNGBeans();
-      for (NGBean bean: nGBeans) {
+      List<NGObject> nGModels = NGRegistry.getInstance().getNGModels();
+      for (NGObject model: nGModels) {
 
          String httpSessionId = SessionMapper.getInstance().getHTTPSessionID(event.getConnection().id);
 
-         BroadcastManager.getInstance().subscribe(httpSessionId, bean.getTargetClass().getSimpleName());
+         BroadcastManager.getInstance().subscribe(httpSessionId, model.getTargetClass().getSimpleName());
       }
 
       event.setClient(this);
@@ -180,7 +180,7 @@ public class RealTimeClient implements Serializable {
 
       ServerEvent ngEvent = new ServerEvent();
       ngEvent.setName("modelQuery");
-      ngEvent.setData(BeanHolder.getInstance().getName(modelQuery.getOwner()));
+      ngEvent.setData(NGHolder.getInstance().getName(modelQuery.getOwner()));
 
       paramsToSend.putAll(modelQuery.getData());
       paramsToSend.put("ngEvent", ngEvent);

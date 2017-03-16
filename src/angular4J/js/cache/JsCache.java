@@ -6,9 +6,9 @@ import java.util.Map;
 import angular4J.util.ClosureCompiler;
 
 /**
- * A cache for the static (non beans instances dependent) angular-beans.js code The content of this
+ * A cache for the static (non models instances dependent) ng4j.js code The content of this
  * cache can be loaded by an implementation of a {@link JsLoader}. <b>It's mandatory to first
- * load the content of this class before any bean generation. </b>
+ * load the content of this class before any model generation. </b>
  *
  * @see angular4J.js.cache.JsLoader
  * @see angular4J.js.cache.JsCacheFactory
@@ -18,7 +18,7 @@ public class JsCache {
 
    private static JsCache instance;
 
-   private final Map<Class, StringBuilder> cachedBean = new HashMap<>();
+   private final Map<Class<?>, StringBuilder> cachedModel = new HashMap<>();
    private StringBuilder coreScript = new StringBuilder();
    private StringBuilder extentionsScript = new StringBuilder();
 
@@ -35,8 +35,8 @@ public class JsCache {
       return instance;
    }
 
-   public Map<Class, StringBuilder> getCachedBean() {
-      return this.cachedBean;
+   public Map<Class<?>, StringBuilder> getCachedModel() {
+      return this.cachedModel;
    }
 
    public StringBuilder getCore() {

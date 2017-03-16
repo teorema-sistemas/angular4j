@@ -20,7 +20,6 @@ public class NGBase64 extends NGBytesBase {
    public static final String HTML_TYPE = "text/html";
 
    public static final String FORM_DATA_TYPE = "multipart/form-data";
-   public static final String FORM_URL_ENCODED_TYPE = "application/x-www-form-urlencoded";
    public static final String TEXT_PLAIN_TYPE = "text/plain";
 
    private String type = FORM_DATA_TYPE;

@@ -1,0 +1,3 @@
+<jboss-web>
+	<context-root>angular4j-sample</context-root>
+</jboss-web>

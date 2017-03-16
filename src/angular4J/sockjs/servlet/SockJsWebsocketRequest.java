@@ -6,7 +6,6 @@ import java.util.Map;
 import javax.websocket.Session;
 
 import angular4J.sockjs.SockJsRequest;
-import angular4J.util.Constants;
 
 public class SockJsWebsocketRequest extends SockJsRequest {
 
@@ -19,8 +18,8 @@ public class SockJsWebsocketRequest extends SockJsRequest {
 
    @Override
    public String getMethod() {
-      // Let's just pretend they're all GETs
-      return Constants.GETTER_PREFIX;
+      // TODO
+      return null;
    }
 
    @Override
