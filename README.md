@@ -15,9 +15,8 @@ With the help of the free software community, the Teorema Sistemas seeks to deve
 - Work with generic attributes in method.
 - Built in i18n Translation.
 - Handles HTTP/HTTPS methods calls.  
-- Requests/responses using Servlet Container, without webservices.
+- Handle real-time calls via Servlet Container, without webservices.
 - Detailed control over server side and client side data updates.
-- Handle real-time calls via WebSockets or SockJS integration.
 - QueryModels: queries from server to client and updates the models.
 - Events and queryModels broadcast.
 - Event Driven, Real Time, and lightweight.
