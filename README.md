@@ -19,8 +19,8 @@ With the help of the free software community, the Teorema Sistemas seeks to deve
 - Byte[] format over server side and Base64 on client side.
 - Inheritance in annotation.
 - Work with generic attributes in method.
-- Transition of compressed and encrypted data.
 - Identification of creation and destruction of real-time sessions.
+- Transition of compressed and encrypted data between client and server.
 
 ## Teorema Angular4J Team
 
