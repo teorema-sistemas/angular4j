@@ -1,4 +1,4 @@
-### DEMO: http://52.67.215.83:8080/angular4j-sample
+### DEMO: http://52.67.181.246:8080/angular4j-sample
 
 ![Angular4J_Logo](https://cloud.githubusercontent.com/assets/26282859/23752270/74a4dcfa-04b3-11e7-9500-e373034e47f7.png "Angular4J Logo")
 
