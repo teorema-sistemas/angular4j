@@ -17,6 +17,7 @@ With the help of the free software community, the Teorema Sistemas seeks to deve
 - Event Driven, Real Time, and lightweight.
 - Date in native format over server side and client side.
 - Byte[] format over server side and Base64 on client side.
+- EJB Beans and/or complex objects on the server side and client side transparently, allowing the use of interfaces, inheritance and generics.
 - Inheritance in annotation.
 - Work with generic attributes in method.
 - Identification of creation and destruction of real-time sessions.
