@@ -22,11 +22,14 @@ public class LoginModelView extends GenericModelView<User> {
 
    @Put
    public User authenticate(String email, String password) {
-      User user = new User();
-      user.setEmail(email);
-      user.setName("Administrador");
-      user.setId(1l);
-      user.setPassword("");
+      User user = null;
+      if (email.equalsIgnoreCase("admin@admin.com") && password.equalsIgnoreCase("admin")) {
+         user = new User();
+         user.setEmail(email);
+         user.setName("Administrador");
+         user.setId(1l);
+         user.setPassword("");
+      }
 
       return user;
    }

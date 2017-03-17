@@ -60,12 +60,13 @@ body {
 	<form class="form-signin" ng-submit="vm.authenticate()">
 		<img class="img-logo-angular4j" src="assets/img/logotipo_angular4J-04.png">
 		<h2 class="form-signin-heading">Please sign in</h2>
-		<label for="inputEmail" class="sr-only">Email address</label> 
-		<input ng-model="vm.credentials.email" type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus> 
+		<label for="inputEmail" class="sr-only">Email (admin@admin.com)</label>
+		<input ng-model="vm.credentials.email" type="email" id="inputEmail" class="form-control" placeholder="E-mail (admin@admin.com)" required autofocus> 
 
-		<label for="inputPassword" class="sr-only">Password</label> 
-		<input ng-model="vm.credentials.password" type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+		<label for="inputPassword" class="sr-only">Password (admin)</label> 
+		<input ng-model="vm.credentials.password" type="password" id="inputPassword" class="form-control" placeholder="Password (admin)" required>
 		
+		<div ng-if="vm.hasErrors" class="help-block with-errors" style="color:#F00"><ul class="list-unstyled"><li>E-mail/password invalid! <br>(use: admin@admin.com / admin)</li></ul></div>
 		<div class="checkbox">
 			<label> 
 			<input type="checkbox" value="remember-me">
