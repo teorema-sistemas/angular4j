@@ -8,6 +8,7 @@ With the help of the free software community, the Teorema Sistemas seeks to deve
 
 ## Features:
 - Generate ready to inject and callable AngularJS Service from CDI Beans.
+- Requests/responses using Servlet Container, without webservices.
 - EJB Beans and/or complex objects on the server side and client side transparently, allowing the use of interfaces, inheritance and generics.
 - Date in native format over server side and client side.
 - Byte[] format over server side and Base64 on client side.
