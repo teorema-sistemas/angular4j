@@ -8,7 +8,6 @@ With the help of the free software community, the Teorema Sistemas seeks to deve
 
 ## Features:
 - Generate ready to inject and callable AngularJS Service from CDI Beans.
-- Binds `$scope` to bean models.
 - Handles HTTP/HTTPS methods calls.  
 - Detailed control over server side and client side data updates.
 - Handle real-time calls via WebSockets or SockJS integration.
@@ -21,9 +20,9 @@ With the help of the free software community, the Teorema Sistemas seeks to deve
 - Inheritance in annotation.
 - Work with generic attributes in method.
 - Transition of compressed and encrypted data.
+- Identification of creation and destruction of real-time sessions.
 
 ## Teorema Angular4J Team
-
 
 |                 |                              | e-mail                       | github link                     |
 | --------------- | ---------------------------- | ---------------------------- | ------------------------------- |
