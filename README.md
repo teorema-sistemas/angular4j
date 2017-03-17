@@ -2,9 +2,7 @@
 
 ![Angular4J_Logo](https://cloud.githubusercontent.com/assets/26282859/23752270/74a4dcfa-04b3-11e7-9500-e373034e47f7.png "Angular4J Logo")
 
-Angular4J is a framework whose intention is to use JavaEE7 -and more precisely the CDI specification- with AngularJS. 
-It was based on the AngularBeans Project (https://bessemhmidi.github.io/AngularBeans/), but it was completely refactored, following a new form, meeting new security and performance requirements, while maintaining the concept established by AngularBeans.
-Maintained by the company Teorema Sistemas (http://www.teorema.inf.br)  where it makes available its technical team in order to develop it and to apply in its own products.
+Angular4J is a framework whose intention is to use the JavaEE7 platform, and more specifically to CDI and EJB 3.1 specifications with the AngularJS framework. It was based on the AngularBeans Project (https://bessemhmidi.github.io/AngularBeans/), but was completely refactored, following a new line, meeting new security and performance requirements, establishing a new concept. Maintained by the company Teorema Sistemas (http://www.teorema.inf.br) where it makes available its technical team to develop it and to apply in its own products.
 
 With the help of the free software community, the Teorema Sistemas seeks to develop its tools, as well as helping other developers do the same.
 
