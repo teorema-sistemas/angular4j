@@ -24,6 +24,7 @@ With the help of the free software community, the Teorema Sistemas seeks to deve
 
 ## Teorema Angular4J Team
 
+
 |                 |                              | e-mail                       | github link                     |
 | --------------- | ---------------------------- | ---------------------------- | ------------------------------- |
 |Gustavo Ribas    | General Manager              | gustavo@teorema.inf.br       |                                 |
