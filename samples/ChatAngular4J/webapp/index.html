@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Angular4J Sample</title>       
+    
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <style>
+        .navbar { border-radius:0; }
+    </style>
+</head>
+
+<body ng-app="ChatModule">
+	<script src="assets/js/angular.min.js"></script>
+
+    <!-- Angular4J Inject-->
+    <script src="ng4j.js"></script>
+    <script src="assets/js/angular4j-main-object.js"></script>
+    <script type="text/javascript">
+    	angular.module("ChatModule", ["ng4J"]).controller("ChatCtrl", function($scope, chatBean){
+    		ng4J.bind($scope, chatBean, ["messages"]);
+
+    		$scope.$watch("messages", function(response){
+    			console.log(response);
+    		});
+    	});
+    	
+    </script>
+
+<div ng-controller="ChatCtrl">
+
+	<label>your name: </label>
+	<input type="text" ng-model="message.sender"/>
+	<label>your message: </label>
+	<input type="text" ng-model="message.content"/>
+	
+	<button ng-click="chatBean.send(message)">SEND</button>
+	
+	<ul ng-repeat="m in messages">
+		<li>{{m.sender}} :: {{m.content}}</li>
+	</ul>
+</div>
+
+</body>
+</html>
