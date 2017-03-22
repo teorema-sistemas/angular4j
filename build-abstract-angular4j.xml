@@ -17,6 +17,7 @@
 			<zipfileset dir="./bin/angular4J/util" prefix="angular4J/util" includes="**/NGLob.class" />
 			<zipfileset dir="./bin/angular4J/util" prefix="angular4J/util" includes="**/NGBase64.class" />
 			<zipfileset dir="./bin/angular4J/util" prefix="angular4J/util" includes="**/NGParamType.class" />
+			<zipfileset dir="./bin/angular4J/util" prefix="angular4J/util" includes="**/NGSession.class" />
 		</jar>
 	</target>
 </project>

@@ -19,6 +19,7 @@ import angular4J.realtime.GlobalConnectionHolder;
  * the registered beans in the {@link BeanRegistry} class.
  */
 
+@SuppressWarnings("serial")
 @ApplicationScoped
 @WebServlet(loadOnStartup = 1, urlPatterns = "/ng4j.js")
 public final class BootServlet extends HttpServlet {

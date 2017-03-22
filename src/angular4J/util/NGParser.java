@@ -164,15 +164,47 @@ public class NGParser implements Serializable {
       return o;
    }
 
-   public void initJsonSerialiser() {
+   public Object deserialiseFromString(String value, Class<?> type) {
+      if (value == null) {
+         return null;
+      }
 
+      if (String.class.equals(type)) {
+         return value;
+      }
+
+      if (type.equals(int.class) || type.equals(Integer.class)) {
+         return Integer.parseInt(value);
+      }
+      if (type.equals(float.class) || type.equals(Float.class)) {
+         return Float.parseFloat(value);
+      }
+      if (type.equals(boolean.class) || type.equals(Boolean.class)) {
+         return Boolean.parseBoolean(value);
+      }
+      if (type.equals(double.class) || type.equals(Double.class)) {
+         return Double.parseDouble(value);
+      }
+      if (type.equals(byte.class) || type.equals(Byte.class)) {
+         return Byte.parseByte(value);
+      }
+      if (type.equals(long.class) || type.equals(Long.class)) {
+         return Long.parseLong(value);
+      }
+      if (type.equals(short.class) || type.equals(Short.class)) {
+         return Short.parseShort(value);
+      }
+
+      throw new IllegalArgumentException("unknown primitive type :" + type.getCanonicalName());
+   }
+
+   public void initJsonSerialiser() {
       GsonBuilder builder = new GsonBuilder();
 
       builder.serializeNulls();
 
       builder.setExclusionStrategies(NGConfig.getGsonExclusionStrategy());
 
-      // --- BYTE[] BLOCK BEGIN ---
       builder.registerTypeAdapter(NGLob.class, new ByteArrayJsonAdapter());
 
       builder.registerTypeAdapter(NGBase64.class, new JsonSerializer<NGBase64>(){
@@ -198,30 +230,23 @@ public class NGParser implements Serializable {
          }
       });
 
-      if (CommonUtils.getBytesArrayBind().equals(Constants.BASE64_BIND)) {
-         builder.registerTypeAdapter(byte[].class, new JsonSerializer<byte[]>(){
+      builder.registerTypeAdapter(byte[].class, new JsonSerializer<byte[]>(){
 
-            @Override
-            public JsonElement serialize(byte[] src, Type typeOfSrc, JsonSerializationContext context) {
-               return getBase64Json(null, src);
-            }
-         });
+         @Override
+         public JsonElement serialize(byte[] src, Type typeOfSrc, JsonSerializationContext context) {
+            return getBase64Json(null, src);
+         }
+      });
 
-         builder.registerTypeAdapter(byte[].class, new JsonDeserializer<byte[]>(){
+      builder.registerTypeAdapter(byte[].class, new JsonDeserializer<byte[]>(){
 
-            @Override
-            public byte[] deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
-               return getBytesFromJson(element);
-            }
-         });
+         @Override
+         public byte[] deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
+            return getBytesFromJson(element);
+         }
+      });
 
-      } else {
-         builder.registerTypeAdapter(byte[].class, new ByteArrayJsonAdapter());
-      }
-      // --- BYTE[] BLOCK END ---
-
-      // --- DATE FORMAT BLOCK BEGIN ---
-      final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+      final SimpleDateFormat dateFormat = new SimpleDateFormat("'" + Constants.DATA_MARK + Constants.DATE_UTC_MARK + "'yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
       if (dateFormat != null && NGConfig.getProperty("TIME_ZONE") != null) {
          dateFormat.setTimeZone(TimeZone.getTimeZone(NGConfig.getProperty("TIME_ZONE")));
@@ -368,8 +393,6 @@ public class NGParser implements Serializable {
          }
 
       });
-
-      // --- DATE FORMAT BLOCK END ---
 
       mainSerializer = builder.create();
    }

@@ -7,28 +7,25 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.HashSet;
-import java.util.Set;
 
 import angular4J.api.CORS;
 import angular4J.api.Eval;
-import angular4J.api.NGPostConstruct;
 import angular4J.api.http.Delete;
 import angular4J.api.http.Get;
 import angular4J.api.http.Post;
 import angular4J.api.http.Put;
 import angular4J.api.http.RequestIgnore;
-import angular4J.context.BeanLocator;
 import angular4J.context.GlobalNGSessionContextsHolder;
+import angular4J.context.NGLocator;
+import angular4J.context.NGSessionScopeContext;
 import angular4J.events.Callback;
 import angular4J.js.cache.JsCache;
 import angular4J.realtime.RealTime;
 import angular4J.util.ClosureCompiler;
 import angular4J.util.CommonUtils;
-import angular4J.util.NGBean;
-import angular4J.util.NGParser;
+import angular4J.util.Constants;
+import angular4J.util.NGObject;
 
 /**
  * <p>
@@ -38,9 +35,8 @@ import angular4J.util.NGParser;
  *
  * @see BeanRegistry
  */
+@SuppressWarnings("serial")
 public class ModuleGenerator implements Serializable {
-
-   private static final String SESSION_ID = "_SESSION_GENERATOR_NG4J";
 
    private static ModuleGenerator instance;
 
@@ -70,20 +66,20 @@ public class ModuleGenerator implements Serializable {
    public void generate() {
       if (this.script == null) {
 
-         GlobalNGSessionContextsHolder.getInstance().getSession(SESSION_ID);
+         NGSessionScopeContext.getInstance().setCurrentContext(Constants.GENERATE_SESSION_ID);
 
          this.script = new StringBuilder();
          this.script.append(JsCache.getInstance().getCore());
          StringBuilder beans = new StringBuilder();
 
-         for (NGBean mb: BeanRegistry.getInstance().getNGBeans()) {
-            beans.append(generateBean(mb));
+         for (NGObject model: NGRegistry.getInstance().getNGModels()) {
+            beans.append(this.generateModel(model));
          }
 
          this.script.append(this.compiler.getCompressedJavaScript(beans.toString()));
          this.script.append(JsCache.getInstance().getExtensions().toString());
 
-         GlobalNGSessionContextsHolder.getInstance().destroySession(SESSION_ID);
+         GlobalNGSessionContextsHolder.getInstance().destroySession(Constants.GENERATE_SESSION_ID);
       }
    }
 
@@ -94,23 +90,23 @@ public class ModuleGenerator implements Serializable {
    }
 
    /**
-    * this method concern is the generation of the AngularJS service from the @Angular4J CDI bean.
+    * this method concern is the generation of the AngularJS service from the @Angular4J CDI model.
     * 
-    * @param bean
-    *           the bean wrapper for an @Angular4J CDI bean.
+    * @param model
+    *           the bean wrapper for an @Angular4J CDI model.
     * @return a StringBuilder containing the generated angular service code.
     */
-   private StringBuilder generateBean(NGBean bean) {
-      Object reference = BeanLocator.getInstance().lookup(bean.getName(), SESSION_ID);
+   private StringBuilder generateModel(NGObject model) {
+      Object reference = NGLocator.getInstance().lookup(model.getName(), Constants.GENERATE_SESSION_ID);
 
       StringBuilder builder = new StringBuilder();
-      builder.append(";app.factory('").append(bean.getName()).append("',function ").append(bean.getName()).append("(");
+      builder.append(";app.factory('").append(model.getName()).append("',function ").append(model.getName()).append("(");
       builder.append("$rootScope, $http, $location,logger,responseHandler,$q");
       builder.append(",realtimeManager){");
-      builder.append("var ").append(bean.getName()).append("={serviceID:'").append(bean.getName()).append("'};");
+      builder.append("var ").append(model.getName()).append("={serviceID:'").append(model.getName()).append("'};");
       builder.append("var rpath=$rootScope.baseUrl+'http/invoke/service/';");
 
-      for (Method m: bean.getMethods()) {
+      for (Method m: model.getMethods()) {
          Annotation ann = CommonUtils.getAnnotation(m, Eval.class);
          if (ann != null) {
 
@@ -129,7 +125,7 @@ public class ModuleGenerator implements Serializable {
                builder.append(js);
             }
             catch (ClassCastException e) {
-               throw new RuntimeException("for bean name: " + bean.getName() + " --> an @Eval bloc must return a String");
+               throw new RuntimeException("for bean name: " + model.getName() + " --> an @Eval bloc must return a String");
             }
             catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                e.printStackTrace();
@@ -138,36 +134,7 @@ public class ModuleGenerator implements Serializable {
          }
       }
 
-      for (Method get: bean.getters()) {
-         Object result = null;
-         String getter = get.getName();
-         String modelName = CommonUtils.obtainFieldNameFromAccessor(getter);
-
-         Method m;
-         try {
-            m = bean.getTargetClass().getMethod(getter);
-
-            result = m.invoke(reference);
-            if ((result == null && (m.getReturnType().equals(String.class)))) {
-               result = "";
-            }
-
-            if (result == null) {
-               continue;
-            }
-
-            Class<? extends Object> resultClazz = result.getClass();
-            if (!resultClazz.isPrimitive()) {
-               result = NGParser.getInstance().getJson(result, null);
-            }
-
-         }
-         catch (Exception e) {}
-
-         builder.append(bean.getName()).append(".").append(modelName).append("=").append(result).append(";");
-      }
-
-      builder.append(generateStaticPart(bean).toString());
+      builder.append(generateStaticPart(model).toString());
       builder.append(");");
 
       return builder;
@@ -175,47 +142,39 @@ public class ModuleGenerator implements Serializable {
 
    /**
     * 
-    * @param bean
+    * @param model
     *           the CDI bean wrapper
     * @return StringBuilder containing the javaScript code of the static (non properties values
     *         dependent) code. by static parts we mean the JS code that can be generated from the
-    *         java class of the bean (to initialize the angularJs service we need to call getters on
-    *         the CDI bean instance and that is considered as the dynamic part of the angularBean
+    *         java class of the model (to initialize the angularJs service we need to call getters on
+    *         the CDI model instance and that is considered as the dynamic part of the angular4J
     *         javascript generation)
     */
-   private StringBuilder generateStaticPart(NGBean bean) {
+   private StringBuilder generateStaticPart(NGObject model) {
       StringBuilder cachedPart = new StringBuilder();
-      if (JsCache.getInstance().getCachedBean().containsKey(bean.getTargetClass())) {
-         return JsCache.getInstance().getCachedBean().get(bean.getTargetClass());
+      if (JsCache.getInstance().getCachedModel().containsKey(model.getTargetClass())) {
+         return JsCache.getInstance().getCachedModel().get(model.getTargetClass());
       }
 
-      Method[] nativesMethods = Object.class.getMethods();
-
-      boolean corsEnabled = false;
-      for (Method m: bean.getMethods()) {
+      for (Method m: model.getMethods()) {
+         if (m.isAnnotationPresent(RequestIgnore.class)) {
+            continue;
+         }
 
          if (m.isAnnotationPresent(Eval.class)) {
             continue;
          }
 
-         if (m.isAnnotationPresent(RequestIgnore.class)) {
-            continue;
-         }
-
-         for (Method nativeMethod: nativesMethods) {
-            if (nativeMethod.equals(m) && !Modifier.isVolatile(m.getModifiers())) {
-               continue;
-            }
-         }
-
-         if ((!CommonUtils.isSetter(m)) && (!CommonUtils.isGetter(m))) {
-            Set<Method> setters = new HashSet<>();
-
-            String httpMethod = null;
-            if (corsEnabled = (m.isAnnotationPresent(CORS.class))) {
-               httpMethod = "get";
-            }
-
+         String httpMethod = null;
+         boolean corsPresent = false;
+         boolean realTimePresent = false;
+         if (m.isAnnotationPresent(CORS.class)) {
+            corsPresent = true;
+            httpMethod = "get";
+         } else if (realTimePresent = CommonUtils.isAnnotationPresent(m, RealTime.class)) {
+            realTimePresent = true;
+            httpMethod = "none";
+         } else {
             if (CommonUtils.isAnnotationPresent(m, Get.class)) {
                httpMethod = "get";
             } else if (CommonUtils.isAnnotationPresent(m, Post.class)) {
@@ -224,81 +183,71 @@ public class ModuleGenerator implements Serializable {
                httpMethod = "put";
             } else if (CommonUtils.isAnnotationPresent(m, Delete.class)) {
                httpMethod = "_delete";
-            } else if (httpMethod == null) {
-               continue;
-            }
-
-            cachedPart.append("ng4J.addMethod(").append(bean.getName()).append(",'").append(m.getName()).append("',function(");
-
-            Type[] parameters = m.getParameterTypes();
-
-            if (parameters.length > 0) {
-               StringBuilder argsString = new StringBuilder();
-               for (int i = 0; i < parameters.length; i++) {
-                  argsString.append("arg").append(i).append(",");
-               }
-               cachedPart.append(argsString.substring(0, argsString.length() - 1));
-            }
-
-            cachedPart.append("){").append("var mainReturn={data:{}};").append("var params={};");
-            cachedPart.append(addParams(bean, setters, m, parameters));
-
-            if (CommonUtils.isAnnotationPresent(m, RealTime.class)) {
-               cachedPart.append("return realtimeManager.call(").append(bean.getName()).append(",'").append(bean.getName()).append(".").append(m.getName()).append("',params");
-               cachedPart.append(").then(function(response){");
-               cachedPart.append("var msg=(response);");
-               cachedPart.append("mainReturn.data= responseHandler.handleResponse(msg,").append(bean.getName()).append(",true);");
-               cachedPart.append("return mainReturn.data;");
-               cachedPart.append("} ,function(response){return $q.reject(response.data);});");
-            } else {
-               cachedPart.append("return $http.").append(httpMethod).append("(rpath+'").append(bean.getName()).append("/").append(m.getName());
-
-               if (corsEnabled) {
-                  cachedPart.append("/CORS");
-               } else {
-                  cachedPart.append("/JSON");
-               }
-
-               if (httpMethod.equals("put") || httpMethod.equals("post")) {
-                  cachedPart.append("',base64Compress(params)");
-               } else {
-                  String paramsQuery = ("?params='+encodeURIComponent(base64Compress(angular.toJson(params)))");
-                  cachedPart.append(paramsQuery);
-               }
-
-               cachedPart.append(").then(function(response) {");
-               cachedPart.append("response.data = generateJson(response.data);");
-               cachedPart.append("var msg=response.data;");
-               cachedPart.append("mainReturn.data= responseHandler.handleResponse(msg,").append(bean.getName()).append(",true);");
-               cachedPart.append("return mainReturn.data;");
-               cachedPart.append("} ,function(response){return $q.reject(response.data);});");
-            }
-
-            cachedPart.append("});");
-
-            if ((!CommonUtils.isSetter(m)) && (!CommonUtils.isGetter(m))) {
-               if (CommonUtils.isAnnotationPresent(m, NGPostConstruct.class)) {
-                  cachedPart.append("realtimeManager.onReadyState(function(){");
-                  cachedPart.append(bean.getName()).append(".").append(m.getName()).append("();");
-                  cachedPart.append("});");
-               }
             }
          }
+
+         if (httpMethod == null) {
+            continue;
+         }
+
+         cachedPart.append("ng4J.addMethod(").append(model.getName()).append(",'").append(m.getName()).append("',function(");
+
+         Type[] parameters = m.getParameterTypes();
+
+         if (parameters.length > 0) {
+            StringBuilder argsString = new StringBuilder();
+            for (int i = 0; i < parameters.length; i++) {
+               argsString.append("arg").append(i).append(",");
+            }
+            cachedPart.append(argsString.substring(0, argsString.length() - 1));
+         }
+
+         cachedPart.append("){").append("var mainReturn={data:{}};").append("var params={};");
+         cachedPart.append(addParams(m, parameters));
+         cachedPart.append("var request = angular.copy(params);");
+         cachedPart.append("revertObjects(request);");
+         if (realTimePresent) {
+            cachedPart.append("return realtimeManager.call(").append(model.getName()).append(",'").append(model.getName()).append(".").append(m.getName()).append("',request");
+            cachedPart.append(").then(function(response){");
+            cachedPart.append("var msg=(response);");
+            cachedPart.append("mainReturn.data= responseHandler.handleResponse(msg,").append(model.getName()).append(",true);");
+            cachedPart.append("return mainReturn.data;");
+            cachedPart.append("} ,function(response){return $q.reject(response.data);});");
+         } else {
+            cachedPart.append("return $http.").append(httpMethod).append("(rpath+'").append(model.getName()).append("/").append(m.getName());
+
+            if (corsPresent) {
+               cachedPart.append("/CORS");
+            } else {
+               cachedPart.append("/BASE64");
+            }
+
+            if (httpMethod.equals("put") || httpMethod.equals("post")) {
+               cachedPart.append("',base64Compress(request)");
+            } else {
+               String paramsQuery = ("?params='+encodeURIComponent(base64Compress(angular.toJson(request)))");
+               cachedPart.append(paramsQuery);
+            }
+
+            cachedPart.append(").then(function(response) {");
+            cachedPart.append("response.data = generateJson(response.data);");
+            cachedPart.append("var msg=response.data;");
+            cachedPart.append("mainReturn.data= responseHandler.handleResponse(msg,").append(model.getName()).append(",true);");
+            cachedPart.append("return mainReturn.data;");
+            cachedPart.append("} ,function(response){return $q.reject(response.data);});");
+         }
+
+         cachedPart.append("});");
       }
 
-      cachedPart.append("return ").append(bean.getName()).append(";}");
-      JsCache.getInstance().getCachedBean().put(bean.getClass(), cachedPart);
+      cachedPart.append("return ").append(model.getName()).append(";}");
+      JsCache.getInstance().getCachedModel().put(model.getClass(), cachedPart);
 
       return cachedPart;
    }
 
-   private StringBuilder addParams(NGBean bean, Set<Method> setters, Method m, Type[] args) {
+   private StringBuilder addParams(Method m, Type[] args) {
       StringBuilder sb = new StringBuilder();
-
-      for (Method setter: setters) {
-         String name = CommonUtils.obtainFieldNameFromAccessor(setter.getName());
-         sb.append("params['").append(name).append("']=").append(bean.getName()).append(".").append(name).append(";");
-      }
 
       if (args.length > 0) {
          StringBuilder argsString = new StringBuilder();
@@ -308,6 +257,7 @@ public class ModuleGenerator implements Serializable {
          argsString = new StringBuilder(argsString.substring(0, argsString.length() - 1));
          sb.append("params['args']=[").append(argsString).append("];");
       }
+
       return sb;
    }
 }

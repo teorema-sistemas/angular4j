@@ -4,20 +4,17 @@ import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
+import angular4J.util.Constants;
+
 /**
  * MainHTTPSessionListener.
  */
 @WebListener
 public class MainHTTPSessionListener implements HttpSessionListener {
 
-   /**
-    * The NG_SESSION identifier.
-    */
-   public static final String NG_SESSION_ATTRIBUTE_NAME = "NG_SESSION_ID";
-
    @Override
    public void sessionCreated(HttpSessionEvent se) {
-      se.getSession().setAttribute(NG_SESSION_ATTRIBUTE_NAME, se.getSession().getId());
+      se.getSession().setAttribute(Constants.NG4J_SESSION_ID, se.getSession().getId());
    }
 
    /**
@@ -25,7 +22,7 @@ public class MainHTTPSessionListener implements HttpSessionListener {
     */
    @Override
    public void sessionDestroyed(HttpSessionEvent se) {
-      GlobalNGSessionContextsHolder.getInstance().destroySession(String.valueOf(se.getSession().getAttribute(NG_SESSION_ATTRIBUTE_NAME)));
+      GlobalNGSessionContextsHolder.getInstance().destroySession(String.valueOf(se.getSession().getAttribute(Constants.NG4J_SESSION_ID)));
       SessionMapper.getInstance().getSessions().remove(se.getSession().getId());
    }
 }

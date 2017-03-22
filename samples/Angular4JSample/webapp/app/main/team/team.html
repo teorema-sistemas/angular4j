@@ -1,0 +1,29 @@
+<div class="row">
+	<div class="col-lg-12">
+		<div class="text-center">
+			<img style="width: 400px" ng-src="assets/img/logotipo_angular4J-02.png" alt="">
+		</div>				
+	</div>
+</div>
+
+<div class="row well" style="background-color: #FFF"">
+  <h2>Teorema Angular4J Team</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Position</th>
+        <th>E-mail</th>
+        <th>Github link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="person in vm.team">
+        <td>{{person.name}}</td>
+        <td>{{person.position}}</td>
+        <td><a href="mailto:{{person.link}}?Subject=Angular4J">{{person.mail}}</a></td>
+        <td><a href="{{person.link}}">{{person.link}}</a></td>
+      </tr>
+    </tbody>
+  </table>
+</div>

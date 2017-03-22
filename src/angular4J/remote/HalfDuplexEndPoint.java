@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
@@ -23,7 +24,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import com.google.gson.JsonObject;
 
-import angular4J.context.BeanLocator;
+import angular4J.context.NGLocator;
 import angular4J.context.NGSessionScopeContext;
 import angular4J.util.CommonUtils;
 import angular4J.util.Constants;
@@ -127,8 +128,6 @@ public class HalfDuplexEndPoint extends HttpServlet implements Serializable {
    }
 
    private void process(HttpServletRequest request, HttpServletResponse resp) {
-     //NGParser.getInstance().setRequest(request);
-
       AsyncContext asyncContext = request.startAsync();
 
       resp.setCharacterEncoding("UTF-8");
@@ -179,8 +178,7 @@ public class HalfDuplexEndPoint extends HttpServlet implements Serializable {
 
       receiveEvents.fire(new HalfDuplexDataReceivedEvent(paramsObj));
 
-      Object result = remoteInvoker.invoke(BeanLocator.getInstance().lookup(parts[0], UID), parts[1], paramsObj, UID, request);
-
+      Map<String, Object> result = remoteInvoker.invoke(NGLocator.getInstance().lookup(parts[0], UID), parts[1], paramsObj, UID, request);
       try {
          PrintWriter writer = asyncContext.getResponse().getWriter();
          writer.write(this.base64Compress(NGParser.getInstance().getJson(result, request)));
