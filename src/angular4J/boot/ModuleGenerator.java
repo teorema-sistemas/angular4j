@@ -26,6 +26,7 @@ import angular4J.util.ClosureCompiler;
 import angular4J.util.CommonUtils;
 import angular4J.util.Constants;
 import angular4J.util.NGObject;
+import angular4J.util.ReflectionUtils;
 
 /**
  * <p>
@@ -63,7 +64,7 @@ public class ModuleGenerator implements Serializable {
     * 
     * @param jsBuffer
     */
-   public void generate() {
+   public synchronized void generate() {
       if (this.script == null) {
 
          NGSessionScopeContext.getInstance().setCurrentContext(Constants.GENERATE_SESSION_ID);
@@ -81,12 +82,6 @@ public class ModuleGenerator implements Serializable {
 
          GlobalNGSessionContextsHolder.getInstance().destroySession(Constants.GENERATE_SESSION_ID);
       }
-   }
-
-   public StringBuilder getValue() {
-      this.generate();
-
-      return this.script;
    }
 
    /**
@@ -107,7 +102,7 @@ public class ModuleGenerator implements Serializable {
       builder.append("var rpath=$rootScope.baseUrl+'http/invoke/service/';");
 
       for (Method m: model.getMethods()) {
-         Annotation ann = CommonUtils.getAnnotation(m, Eval.class);
+         Annotation ann = ReflectionUtils.getAnnotation(m, Eval.class);
          if (ann != null) {
 
             Callback callback = ((Eval) ann).value();
@@ -146,8 +141,8 @@ public class ModuleGenerator implements Serializable {
     *           the CDI bean wrapper
     * @return StringBuilder containing the javaScript code of the static (non properties values
     *         dependent) code. by static parts we mean the JS code that can be generated from the
-    *         java class of the model (to initialize the angularJs service we need to call getters on
-    *         the CDI model instance and that is considered as the dynamic part of the angular4J
+    *         java class of the model (to initialize the angularJs service we need to call getters
+    *         on the CDI model instance and that is considered as the dynamic part of the angular4J
     *         javascript generation)
     */
    private StringBuilder generateStaticPart(NGObject model) {
@@ -171,17 +166,17 @@ public class ModuleGenerator implements Serializable {
          if (m.isAnnotationPresent(CORS.class)) {
             corsPresent = true;
             httpMethod = "get";
-         } else if (realTimePresent = CommonUtils.isAnnotationPresent(m, RealTime.class)) {
+         } else if (realTimePresent = ReflectionUtils.isAnnotationPresent(m, RealTime.class)) {
             realTimePresent = true;
             httpMethod = "none";
          } else {
-            if (CommonUtils.isAnnotationPresent(m, Get.class)) {
+            if (ReflectionUtils.isAnnotationPresent(m, Get.class)) {
                httpMethod = "get";
-            } else if (CommonUtils.isAnnotationPresent(m, Post.class)) {
+            } else if (ReflectionUtils.isAnnotationPresent(m, Post.class)) {
                httpMethod = "post";
-            } else if (CommonUtils.isAnnotationPresent(m, Put.class)) {
+            } else if (ReflectionUtils.isAnnotationPresent(m, Put.class)) {
                httpMethod = "put";
-            } else if (CommonUtils.isAnnotationPresent(m, Delete.class)) {
+            } else if (ReflectionUtils.isAnnotationPresent(m, Delete.class)) {
                httpMethod = "_delete";
             }
          }
@@ -259,5 +254,11 @@ public class ModuleGenerator implements Serializable {
       }
 
       return sb;
+   }
+
+   public StringBuilder getValue() {
+      this.generate();
+
+      return this.script;
    }
 }

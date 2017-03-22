@@ -21,6 +21,12 @@ import angular4J.sockjs.Transport;
 
 public class SockJsEndpoint extends Endpoint {
 
+   private SockJsServer server;
+   private String contextPath;
+   private String prefix;
+
+   private static final Logger log = Logger.getLogger(SockJsEndpoint.class.getName());
+
    public SockJsEndpoint(SockJsServer server, String contextPath, String prefix) {
       this.server = server;
       this.contextPath = contextPath;
@@ -46,10 +52,4 @@ public class SockJsEndpoint extends Endpoint {
    public void onError(Session session, Throwable thr) {
       log.log(Level.FINE, "Error in SockJS WebSocket endpoint", thr);
    }
-
-   private SockJsServer server;
-   private String contextPath;
-   private String prefix;
-
-   private static final Logger log = Logger.getLogger(SockJsEndpoint.class.getName());
 }

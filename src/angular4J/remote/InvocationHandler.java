@@ -1,6 +1,7 @@
 package angular4J.remote;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -15,24 +16,20 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import angular4J.api.NGCast;
 import angular4J.api.NGCastIgnore;
-import angular4J.api.NGClassCast;
-import angular4J.api.NGParam;
-import angular4J.api.NGParamCast;
+import angular4J.api.NGCastMap;
 import angular4J.context.NGSessionScopeContext;
 import angular4J.log.NGLogger;
 import angular4J.log.NGLogger.Level;
-import angular4J.util.CommonUtils;
 import angular4J.util.ModelQueryFactory;
 import angular4J.util.ModelQueryImpl;
-import angular4J.util.NGParamType;
 import angular4J.util.NGParser;
+import angular4J.util.NGTypeMap;
 
 /**
  * Angular4J RPC main handler.
@@ -57,7 +54,7 @@ public class InvocationHandler implements Serializable {
          genericInvoke(ServiceToInvoque, methodName, params, returns, reqID, UID, null);
 
          if (returns.get("mainReturn") != null) {
-            event.getConnection().write(NGParser.getInstance().getJson(returns, null), false);
+            event.getConnection().write(NGParser.getInstance().serialize(returns), false);
          }
       }
       catch (SecurityException | ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException e) {
@@ -177,92 +174,50 @@ public class InvocationHandler implements Serializable {
       }
 
       if (this.isPrimitiveParseRequired(klass)) {
-         return NGParser.getInstance().deserialise(klass, element);
+         return NGParser.getInstance().deserialize(element, klass);
       } else {
          return NGParser.getInstance().deserialiseFromString(element.getAsString(), klass);
       }
    }
 
-   private Map<Integer, Object[]> getParamCastMap(Method m) {
-      if (CommonUtils.isAnnotationPresent(m, NGParamCast.class)) {
-         NGParamCast ngCast = (NGParamCast) CommonUtils.getAnnotation(m, NGParamCast.class);
-         if (ngCast != null) {
-            NGParam[] params = ngCast.value();
-            if (params != null && params.length > 0) {
-
-               Map<Integer, Object[]> result = new HashMap<>();
-
-               for (NGParam param: params) {
-                  Object[] aParams = new Object[3];
-                  aParams[0] = param.id();
-                  aParams[1] = param.type();
-                  aParams[2] = param.required();
-
-                  for (int i: param.index()) {
-                     result.put(i, aParams);
+   private Type getParamType(Object service, String id) {
+      try {
+         Field[] fields = service.getClass().getDeclaredFields();
+         for (Field field: fields) {
+            if (field.getType().isAssignableFrom(NGTypeMap.class)) {
+               NGCastMap ann = field.getAnnotation(NGCastMap.class);
+               if (ann != null) {
+                  field.setAccessible(true);
+                  NGTypeMap ngTypeMap = (NGTypeMap) field.get(service);
+                  if (ngTypeMap != null) {
+                     return ngTypeMap.getNGType(id).getType();
                   }
                }
-
-               return result;
             }
          }
       }
+      catch (Exception e) {}
+
       return null;
    }
 
-   private Class<?> getParamClass(Object service, String id, NGParamType type, boolean required) {
-      if (id != null && id.length() > 0) {
-         try {
-            if (type.equals(NGParamType.FIELD)) {
-               Field[] fields = service.getClass().getDeclaredFields();
-               for (Field field: fields) {
-                  NGClassCast ann = field.getAnnotation(NGClassCast.class);
-                  if (ann != null && ArrayUtils.contains(ann.value(), id)) {
-                     field.setAccessible(true);
-
-                     return (Class<?>) field.get(service);
-                  }
-               }
-            } else {
-               Method[] ms = service.getClass().getDeclaredMethods();
-               if (ms != null && ms.length > 0) {
-                  for (Method m: ms) {
-                     NGClassCast ann = (NGClassCast) CommonUtils.getAnnotation(m, NGClassCast.class);
-                     if (ann != null && ArrayUtils.contains(ann.value(), id)) {
-                        m.setAccessible(true);
-                        return (Class<?>) m.invoke(service);
-                     }
-                  }
-               }
-            }
-         }
-         catch (Exception e) {
-            if (required) {
-               e.printStackTrace();
-            }
-         }
-      }
-      return null;
-   }
-
-   private Class<?> getParamCastType(Object service, Method m, int paramNumber) {
+   private Type getParamCastType(Object service, Method m, int paramNumber) {
       if (!m.isAnnotationPresent(NGCastIgnore.class)) {
-         Map<Integer, Object[]> ngCast = this.getParamCastMap(m);
-         if (ngCast != null) {
-            Object[] ngCastParam = ngCast.get(paramNumber);
-            if (ngCastParam != null) {
-               return this.getParamClass(service, (String) ngCastParam[0], (NGParamType) ngCastParam[1], (boolean) ngCastParam[2]);
+         Annotation[] annotations = m.getParameterAnnotations()[paramNumber];
+         for (Annotation ann: annotations) {
+            if (ann.annotationType().isAssignableFrom(NGCast.class)) {
+               return this.getParamType(service, ((NGCast) ann).value());
             }
          }
       }
       return null;
    }
 
-   private Object castNGParam(Object service, Class<?> nGParam, JsonElement element) {
+   private Object castNGParam(Object service, Type type, JsonElement element) {
       if (element.isJsonArray()) {
-         return NGParser.getInstance().deserialise(nGParam, element.getAsJsonArray());
+         return NGParser.getInstance().deserialize(element.getAsJsonArray(), type);
       } else {
-         return NGParser.getInstance().deserialise(nGParam, element);
+         return NGParser.getInstance().deserialize(element, type);
       }
    }
 
@@ -270,9 +225,9 @@ public class InvocationHandler implements Serializable {
       if (element.isJsonPrimitive()) {
          return this.getPrimitiveType(param, element);
       } else if (element.isJsonArray()) {
-         return NGParser.getInstance().deserialise(param, element.getAsJsonArray());
+         return NGParser.getInstance().deserialize(element.getAsJsonArray(), param);
       } else {
-         return NGParser.getInstance().deserialise(param, element);
+         return NGParser.getInstance().deserialize(element, param);
       }
    }
 
@@ -295,9 +250,9 @@ public class InvocationHandler implements Serializable {
 
             List<Object> argsValues = new ArrayList<>();
             for (int i = 0; i < parameters.length; i++) {
-               Class<?> ngCastType = this.getParamCastType(service, m, i);
-               if (ngCastType != null) {
-                  argsValues.add(this.castNGParam(service, ngCastType, args.get(i)));
+               Type type = this.getParamCastType(service, m, i);
+               if (type != null) {
+                  argsValues.add(this.castNGParam(service, type, args.get(i)));
                } else {
                   argsValues.add(this.castParam(service, parameters[i], args.get(i)));
                }
@@ -319,13 +274,13 @@ public class InvocationHandler implements Serializable {
          catch (Exception e) {}
       }
 
-      ModelQueryImpl qImpl = (ModelQueryImpl) modelQueryFactory.get(service.getClass());
+      ModelQueryImpl qImpl = (ModelQueryImpl) this.modelQueryFactory.get(service.getClass());
       Map<String, Object> scMap = new HashMap<>(qImpl.getData());
       returns.putAll(scMap);
       qImpl.getData().clear();
-      if (!modelQueryFactory.getRootScope().getRootScopeMap().isEmpty()) {
-         returns.put("rootScope", new HashMap<>(modelQueryFactory.getRootScope().getRootScopeMap()));
-         modelQueryFactory.getRootScope().getRootScopeMap().clear();
+      if (!this.modelQueryFactory.getRootScope().getRootScopeMap().isEmpty()) {
+         returns.put("rootScope", new HashMap<>(this.modelQueryFactory.getRootScope().getRootScopeMap()));
+         this.modelQueryFactory.getRootScope().getRootScopeMap().clear();
       }
 
       returns.put("mainReturn", mainReturn);

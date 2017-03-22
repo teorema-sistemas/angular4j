@@ -21,6 +21,13 @@ import angular4J.sockjs.SockJsServer;
 
 public class RawWebsocketEndpoint extends Endpoint {
 
+   private SockJsServer server;
+   private String contextPath;
+   private String prefix;
+
+   private static final Map<String, RawWebsocketSessionReceiver> receivers = new ConcurrentHashMap<>();
+   private static final Logger log = Logger.getLogger(RawWebsocketEndpoint.class.getName());
+   
    public RawWebsocketEndpoint(SockJsServer server, String contextPath, String prefix) {
       this.server = server;
       this.contextPath = contextPath;
@@ -50,11 +57,4 @@ public class RawWebsocketEndpoint extends Endpoint {
    public void onError(Session session, Throwable thr) {
       log.log(Level.FINE, "Error in raw WebSocket endpoint", thr);
    }
-
-   private SockJsServer server;
-   private String contextPath;
-   private String prefix;
-
-   private static final Map<String, RawWebsocketSessionReceiver> receivers = new ConcurrentHashMap<>();
-   private static final Logger log = Logger.getLogger(RawWebsocketEndpoint.class.getName());
 }

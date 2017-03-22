@@ -218,7 +218,7 @@ public class RealTimeClient implements Serializable {
          }
          if (connection.getReadyState().equals(OPEN)) {
 
-            String objectMessage = NGParser.getInstance().getJson(paramsToSend, null);
+            String objectMessage = NGParser.getInstance().serialize(paramsToSend);
             connection.write(objectMessage, async);
             async = false;
          }
@@ -232,7 +232,7 @@ public class RealTimeClient implements Serializable {
             sessions.remove(session);
          } else {
 
-            session.write(NGParser.getInstance().getJson(paramsToSend, null), async);
+            session.write(NGParser.getInstance().serialize(paramsToSend), async);
             async = false;
          }
       }

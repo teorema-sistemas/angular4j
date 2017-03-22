@@ -26,7 +26,6 @@ import com.google.gson.JsonObject;
 
 import angular4J.context.NGLocator;
 import angular4J.context.NGSessionScopeContext;
-import angular4J.util.CommonUtils;
 import angular4J.util.Constants;
 import angular4J.util.NGParser;
 
@@ -170,7 +169,7 @@ public class HalfDuplexEndPoint extends HttpServlet implements Serializable {
          catch (Exception e) {}
       }
 
-      JsonObject paramsObj = CommonUtils.parseMessage(this.base64Decompress(params)).getAsJsonObject();
+      JsonObject paramsObj = NGParser.parseMessage(this.base64Decompress(params)).getAsJsonObject();
 
       String UID = this.session.getId();
 
@@ -181,7 +180,7 @@ public class HalfDuplexEndPoint extends HttpServlet implements Serializable {
       Map<String, Object> result = remoteInvoker.invoke(NGLocator.getInstance().lookup(parts[0], UID), parts[1], paramsObj, UID, request);
       try {
          PrintWriter writer = asyncContext.getResponse().getWriter();
-         writer.write(this.base64Compress(NGParser.getInstance().getJson(result, request)));
+         writer.write(this.base64Compress(NGParser.getInstance().serialize(result, request)));
          writer.flush();
          asyncContext.complete();
       }

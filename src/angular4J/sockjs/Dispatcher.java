@@ -8,16 +8,74 @@ package angular4J.sockjs;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import angular4J.util.CommonUtils;
+
 public class Dispatcher {
 
-   public Dispatcher(DispatchFunction handle404, DispatchFunction handle405, DispatchFunction handleError) {
-      this.handle404 = handle404;
-      this.handle405 = handle405;
-      this.handleError = handleError;
-   }
+   private static final Logger log = Logger.getLogger(Dispatcher.class.getName());
+
+   private DispatchFunction handle404 = new DispatchFunction(){
+
+      @Override
+      public Object handle(SockJsRequest req, SockJsResponse res, Object x) throws SockJsException {
+         if (res.finished()) {
+            return x;
+         }
+         res.setHeader("content-type", "text/plain; charset=UTF-8");
+         res.writeHead(404);
+         res.end("404 Error: Page not found\n");
+         return true;
+      }
+   };
+
+   private DispatchFunction handle405 = new DispatchFunction(){
+
+      @Override
+      @SuppressWarnings("unchecked")
+      public Object handle(SockJsRequest req, SockJsResponse res, Object data) throws SockJsException {
+         List<String> methods = (List<String>) data;
+         res.setHeader("Allow", CommonUtils.parseStrArray(methods, ", "));
+         res.writeHead(405);
+         res.end();
+         return true;
+      }
+   };
+
+   private DispatchFunction handleError = new DispatchFunction(){
+
+      @Override
+      public Object handle(SockJsRequest req, SockJsResponse res, Object data) throws SockJsException {
+         Exception x = (Exception) data;
+         if (res.finished()) {
+            return x;
+         }
+         log.log(Level.FINER, "handleError", x);
+         if (x instanceof DispatchException) {
+            DispatchException dx = (DispatchException) x;
+            log.log(Level.FINE, "DispatchException message: {0}", dx.message);
+            res.writeHead(dx.status);
+            String message = dx.message;
+            if (message == null) {
+               message = "";
+            }
+            res.end(message);
+         } else {
+            try {
+               res.writeHead(500);
+               res.end("500 - Internal Server Error");
+            }
+            catch (Exception e) {}
+         }
+         return true;
+      }
+   };
+
+   private List<DispatchEntry> rows = new ArrayList<>();
 
    public void push(String method, String pattern, DispatchFunction... functions) {
       rows.add(new DispatchEntry(method, pattern, functions));
@@ -94,11 +152,6 @@ public class Dispatcher {
          }
       }
    }
-
-   private DispatchFunction handle404;
-   private DispatchFunction handle405;
-   private DispatchFunction handleError;
-   private List<DispatchEntry> rows = new ArrayList<>();
 
    public static class DispatchEntry {
 

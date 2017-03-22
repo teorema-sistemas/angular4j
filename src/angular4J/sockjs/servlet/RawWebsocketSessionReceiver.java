@@ -25,6 +25,10 @@ import angular4J.sockjs.SockJsServer;
  * RawWebsocketSessionReceiver logic from sockjs-node's trans-websocket.coffee
  */
 public class RawWebsocketSessionReceiver extends Session {
+   
+   private javax.websocket.Session ws;
+
+   private static final Logger log = Logger.getLogger(RawWebsocketSessionReceiver.class.getName());
 
    public RawWebsocketSessionReceiver(SockJsRequest req, SockJsServer server, javax.websocket.Session ws) {
       super(null, server);
@@ -114,8 +118,4 @@ public class RawWebsocketSessionReceiver extends Session {
       connection.emitClose();
       connection = null;
    }
-
-   private javax.websocket.Session ws;
-
-   private static final Logger log = Logger.getLogger(RawWebsocketSessionReceiver.class.getName());
 }

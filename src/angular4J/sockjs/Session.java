@@ -22,12 +22,12 @@ public class Session {
 
    private String sessionId;
    private SockJsServer server;
-   private int disconnectDelay;
-   private int heartbeatDelay;
+   private final int disconnectDelay = 5000;
+   private final int heartbeatDelay = 25000;
    private List<String> sendBuffer;
    protected ReadyState readyState;
    private Runnable timeoutCb;
-   private ScheduledFuture toTref;
+   private ScheduledFuture<?> toTref;
    protected SockJsConnection connection;
    private Runnable emitOpen;
    protected GenericReceiver recv;
@@ -39,8 +39,6 @@ public class Session {
    public Session(String sessionId, final SockJsServer server) {
       this.sessionId = sessionId;
       this.server = server;
-      heartbeatDelay = server.options.heartbeatDelay;
-      disconnectDelay = server.options.disconnectDelay;
       sendBuffer = new ArrayList<>();
       readyState = CONNECTING;
       if (sessionId != null && sessionId.length() > 0) {

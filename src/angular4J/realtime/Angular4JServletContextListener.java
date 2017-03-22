@@ -28,8 +28,7 @@ import angular4J.util.ClosureCompiler;
 import angular4J.util.Constants;
 
 /**
- * this listener:
- * initialize the sockJs server end point
+ * this listener: initialize the sockJs server end point
  */
 
 @WebListener
@@ -120,27 +119,24 @@ public class Angular4JServletContextListener implements ServletContextListener {
       sockJsServer = new SockJsServer();
       sockJsServer.init();
 
-      if (sockJsServer.options.websocket) {
+      final String commonPrefix = extractPrefixFromMapping(Constants.URL_PATTERNS_SERVICE);
 
-         final String commonPrefix = extractPrefixFromMapping(Constants.URL_PATTERNS_SERVICE);
+      String websocketPath = commonPrefix + "/{server}/{session}/websocket";
+      ServerEndpointConfig sockJsConfig = ServerEndpointConfig.Builder.create(SockJsEndpoint.class, websocketPath).configurator(configuratorFor(commonPrefix, false)).build();
 
-         String websocketPath = commonPrefix + "/{server}/{session}/websocket";
-         ServerEndpointConfig sockJsConfig = ServerEndpointConfig.Builder.create(SockJsEndpoint.class, websocketPath).configurator(configuratorFor(commonPrefix, false)).build();
+      String rawWebsocketPath = commonPrefix + "/websocket";
 
-         String rawWebsocketPath = commonPrefix + "/websocket";
+      ServerEndpointConfig rawWsConfig = ServerEndpointConfig.Builder.create(RawWebsocketEndpoint.class, rawWebsocketPath).configurator(configuratorFor(commonPrefix, true)).build();
 
-         ServerEndpointConfig rawWsConfig = ServerEndpointConfig.Builder.create(RawWebsocketEndpoint.class, rawWebsocketPath).configurator(configuratorFor(commonPrefix, true)).build();
+      ServerContainer serverContainer = (ServerContainer) context.getAttribute("javax.websocket.server.ServerContainer");
+      try {
+         serverContainer.addEndpoint(sockJsConfig);
+         serverContainer.addEndpoint(rawWsConfig);
 
-         ServerContainer serverContainer = (ServerContainer) context.getAttribute("javax.websocket.server.ServerContainer");
-         try {
-            serverContainer.addEndpoint(sockJsConfig);
-            serverContainer.addEndpoint(rawWsConfig);
-
-            Logger.getLogger(this.getClass().getSimpleName()).info("deployement of programmatic Web socket EndPoint :" + rawWebsocketPath);
-         }
-         catch (DeploymentException ex) {
-            throw new ServletException("Error deploying websocket endpoint:", ex);
-         }
+         Logger.getLogger(this.getClass().getSimpleName()).info("deployement of programmatic Web socket EndPoint :" + rawWebsocketPath);
+      }
+      catch (DeploymentException ex) {
+         throw new ServletException("Error deploying websocket endpoint:", ex);
       }
    }
 }

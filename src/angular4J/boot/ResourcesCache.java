@@ -42,7 +42,7 @@ public class ResourcesCache {
          Properties properties = new Properties();
          try {
             properties.load(is);
-            json = NGParser.getInstance().getJson(properties, null);
+            json = NGParser.getInstance().serialize(properties);
          }
          catch (IOException e) {
             e.printStackTrace();

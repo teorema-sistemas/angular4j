@@ -16,6 +16,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
@@ -37,6 +38,18 @@ public class NGParser implements Serializable {
 
    private transient Gson mainSerializer;
    private HttpServletRequest request;
+
+   public static JsonElement parseMessage(String message) {
+      if (message == null) {
+         return null;
+      }
+      if (!message.startsWith("{")) {
+         return new JsonPrimitive(message);
+      }
+      JsonParser parser = new JsonParser();
+
+      return parser.parse(message);
+   }
 
    private static final void createInstance() {
       instance = new NGParser();
@@ -91,7 +104,7 @@ public class NGParser implements Serializable {
 
    private byte[] getBytesFromJson(JsonElement element) {
       String value = element.getAsString();
-      if (value != null && value.trim().length() > 0) {
+      if (CommonUtils.isStrValid(value)) {
          try {
             if (value.contains(Constants.DATA_MARK) && value.contains(Constants.BASE64_MARK)) {
                value = value.substring(value.indexOf(Constants.BASE64_MARK) + Constants.BASE64_MARK.length());
@@ -120,7 +133,11 @@ public class NGParser implements Serializable {
       return null;
    }
 
-   public String getJson(Object object, HttpServletRequest request) {
+   public String serialize(Object object) {
+      return this.serialize(object, null);
+   }
+
+   public String serialize(Object object, HttpServletRequest request) {
       if (object == null) {
          return null;
       }
@@ -130,13 +147,17 @@ public class NGParser implements Serializable {
       return mainSerializer.toJson(object);
    }
 
-   public Object deserialise(Type type, JsonElement element) {
+   public Object deserialize(JsonElement element, Type type) {
       return mainSerializer.fromJson(element, type);
+   }
+
+   public Object deserialize(String json, Type type) {
+      return mainSerializer.fromJson(json, type);
    }
 
    public Object convertEvent(NGEvent event) throws ClassNotFoundException {
 
-      JsonElement element = CommonUtils.parseMessage(event.getData());
+      JsonElement element = parseMessage(event.getData());
 
       JsonElement data;
       Class<?> javaClass;
@@ -159,7 +180,7 @@ public class NGParser implements Serializable {
       if (javaClass.equals(String.class)) {
          o = data.toString().substring(1, data.toString().length() - 1);
       } else {
-         o = deserialise(javaClass, data);
+         o = deserialize(data, javaClass);
       }
       return o;
    }
@@ -278,7 +299,7 @@ public class NGParser implements Serializable {
 
             try {
                String dateFormated = element.getAsString();
-               if (dateFormated != null && dateFormated.trim().length() > 0) {
+               if (CommonUtils.isStrValid(dateFormated)) {
                   Calendar cal = Calendar.getInstance();
                   cal.setTime(dateFormat.parse(dateFormated));
                   cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -317,7 +338,7 @@ public class NGParser implements Serializable {
 
             try {
                String dateFormated = element.getAsString();
-               if (dateFormated != null && dateFormated.trim().length() > 0) {
+               if (CommonUtils.isStrValid(dateFormated)) {
                   Calendar cal = Calendar.getInstance();
                   cal.setTime(dateFormat.parse(dateFormated));
 
@@ -353,7 +374,7 @@ public class NGParser implements Serializable {
 
             try {
                String dateFormated = element.getAsString();
-               if (dateFormated != null && dateFormated.trim().length() > 0) {
+               if (CommonUtils.isStrValid(dateFormated)) {
                   Calendar cal = Calendar.getInstance();
                   cal.setTime(dateFormat.parse(dateFormated));
 
@@ -383,7 +404,7 @@ public class NGParser implements Serializable {
 
             try {
                String dateFormated = element.getAsString();
-               if (dateFormated != null && dateFormated.trim().length() > 0) {
+               if (CommonUtils.isStrValid(dateFormated)) {
                   return dateFormat.parse(dateFormated);
                }
             }

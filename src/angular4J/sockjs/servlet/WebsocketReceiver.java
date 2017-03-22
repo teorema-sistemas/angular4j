@@ -14,7 +14,7 @@ import javax.websocket.MessageHandler;
 import javax.websocket.Session;
 
 import angular4J.sockjs.GenericReceiver;
-import angular4J.sockjs.Utils;
+import angular4J.util.NGParser;
 
 /**
  * WebsocketReceiver logic from sockjs-node's trans-websocket.coffee
@@ -39,7 +39,7 @@ public class WebsocketReceiver extends GenericReceiver {
          if (payload.charAt(0) == '[') {
             List<String> messages;
             try {
-               messages = Utils.parseJson(payload, List.class);
+               messages = (List<String>) NGParser.getInstance().deserialize(payload, List.class);
             }
             catch (Exception x) {
                try {
@@ -55,7 +55,7 @@ public class WebsocketReceiver extends GenericReceiver {
          } else {
             String message;
             try {
-               message = Utils.parseJson(payload, String.class);
+               message = (String) NGParser.getInstance().deserialize(payload, String.class);
             }
             catch (Exception x) {
                try {
