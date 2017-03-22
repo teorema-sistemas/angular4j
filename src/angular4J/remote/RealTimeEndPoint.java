@@ -22,8 +22,8 @@ import angular4J.realtime.Angular4JServletContextListener;
 import angular4J.sockjs.SockJsConnection;
 import angular4J.sockjs.SockJsServer;
 import angular4J.sockjs.servlet.SockJsServlet;
-import angular4J.util.CommonUtils;
 import angular4J.util.Constants;
+import angular4J.util.NGParser;
 
 /**
  * The RealTimeEndPoint servlet is the realtime sockjs protocol endpoint
@@ -69,7 +69,7 @@ public class RealTimeEndPoint extends SockJsServlet {
                public void handle(String message) {
 
                   if (message != null) {
-                     JsonObject jObj = CommonUtils.parseMessage(message).getAsJsonObject();
+                     JsonObject jObj = NGParser.parseMessage(message).getAsJsonObject();
 
                      String UID = null;
 
@@ -124,8 +124,6 @@ public class RealTimeEndPoint extends SockJsServlet {
             });
          }
       });
-
-      server.options.websocket = true;
 
       setServer(server);
 

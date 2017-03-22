@@ -8,17 +8,17 @@ With the help of the free software community, the Teorema Sistemas seeks to deve
 
 ## Features:
 - Generate ready to inject and callable AngularJS Service from CDI Beans.
-- Handles HTTP/HTTPS methods calls.  
-- Detailed control over server side and client side data updates.
-- Handle real-time calls via WebSockets or SockJS integration.
-- QueryModels: queries from server to client and updates the models.
-- Events and queryModels broadcast.
-- Built in i18n Translation.
-- Event Driven, Real Time, and lightweight.
+- EJB Beans and/or complex objects on the server side and client side transparently, allowing the use of interfaces, inheritance and generics.
 - Date in native format over server side and client side.
 - Byte[] format over server side and Base64 on client side.
 - Inheritance in annotation.
 - Work with generic attributes in method.
+- Built in i18n Translation.
+- Handles HTTP/HTTPS methods calls.  
+- Real-time calls via Servlet Container, without webservices.
+- QueryModels: queries from server to client and updates the models.
+- Events and queryModels broadcast.
+- Event Driven, Real Time, and lightweight.
 - Identification of creation and destruction of real-time sessions.
 - Transition of compressed and encrypted data between client and server.
 

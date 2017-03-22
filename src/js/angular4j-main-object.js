@@ -13,6 +13,24 @@ function AngularEvent(data, dataClass) {
 };
 
 var ng4J = {
+	bind: function (scope, service, modelsName) {
+
+		scope[service.serviceID] = service;
+
+		for (i in modelsName) {
+
+			modelsName[i] = service.serviceID + '.' + modelsName[i];
+		}
+
+		scope.$watch(angular.toJson(modelsName).split('\"').join(''), function (newValue, oldValue) {
+
+			for (i in modelsName) {
+				scope[modelsName[i].split(service.serviceID + '.')[1]] = newValue[i];
+			}
+
+		}, true);
+
+	},
 	addMethod: function (object, name, fn) {
 
 		if (object['$ab_fn_cache'] == null) {

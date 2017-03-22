@@ -8,6 +8,9 @@ package angular4J.sockjs;
 import java.util.ArrayList;
 import java.util.List;
 
+import angular4J.util.CommonUtils;
+import angular4J.util.NGParser;
+
 public abstract class GenericReceiver {
 
    protected void didAbort() {
@@ -27,9 +30,9 @@ public abstract class GenericReceiver {
    public void doSendBulk(List<String> messages) {
       List<String> qMsgs = new ArrayList<>(messages.size());
       for (String m: messages) {
-         qMsgs.add(Utils.quote(m));
+         qMsgs.add(NGParser.getInstance().serialize(m));
       }
-      doSendFrame("a[" + Utils.join(qMsgs, ",") + "]");
+      doSendFrame("a[" + CommonUtils.parseStrArray(qMsgs, ",") + "]");
    }
 
    public abstract boolean doSendFrame(String payload);

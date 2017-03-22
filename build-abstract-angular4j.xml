@@ -9,15 +9,17 @@
 
 		<echo>gerando arquivo abstractangular4j.jar...</echo>
 		<jar file="jar/abstractangular4j.jar" update="true" compress="true">
-			<zipfileset dir="./bin/angular4J/api" prefix="angular4J/api" includes="**/NG*.class" />
+			<zipfileset dir="./bin/angular4J/api" prefix="angular4J/api" includes="**/*.class" excludes="**/Angular4J.class" />
 			<zipfileset dir="./bin/angular4J/api/http" prefix="angular4J/api/http" includes="**/*.class" />
+			<zipfileset dir="./bin/angular4J/events" prefix="angular4J/events" includes="**/Callback.class" />
+			<zipfileset dir="./bin/angular4J/util" prefix="angular4J/util" includes="**/CommonUtils.class" />
 			<zipfileset dir="./bin/angular4J/util" prefix="angular4J/util" includes="**/Constants.class" />
 			<zipfileset dir="./bin/angular4J/util" prefix="angular4J/util" includes="**/ModelQuery.class" />
+			<zipfileset dir="./bin/angular4J/util" prefix="angular4J/util" includes="**/NGBase64.class" />
 			<zipfileset dir="./bin/angular4J/util" prefix="angular4J/util" includes="**/NGBytesBase.class" />
 			<zipfileset dir="./bin/angular4J/util" prefix="angular4J/util" includes="**/NGLob.class" />
-			<zipfileset dir="./bin/angular4J/util" prefix="angular4J/util" includes="**/NGBase64.class" />
-			<zipfileset dir="./bin/angular4J/util" prefix="angular4J/util" includes="**/NGParamType.class" />
-			<zipfileset dir="./bin/angular4J/util" prefix="angular4J/util" includes="**/NGSession.class" />
+			<zipfileset dir="./bin/angular4J/util" prefix="angular4J/util" includes="**/Pair.class" />
+			<zipfileset dir="./bin/angular4J/util" prefix="angular4J/util" includes="**/ReflectionUtils.class" />
 		</jar>
 	</target>
 </project>

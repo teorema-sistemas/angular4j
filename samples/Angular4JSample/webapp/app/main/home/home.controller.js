@@ -70,7 +70,7 @@
         function getFile(file, key) {         
             fileReader.readAsDataUrl(file, $scope)
             .then(function(result) {
-                vm.info.image = result;
+                vm.info.image = new NGBase64(result);
             });
         };
 

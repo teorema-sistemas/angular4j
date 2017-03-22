@@ -8,9 +8,8 @@ import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 
-import org.boon.Pair;
-
 import angular4J.util.Constants;
+import angular4J.util.Pair;
 
 /**
  * 

@@ -7,12 +7,63 @@ package angular4J.sockjs;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class SockJsConnection {
+   
+   private Session session;
+   private OnDataHandler onDataHandler;
+   private OnCloseHandler onCloseHandler;
+
+   /**
+    * Unique identifier of this connection
+    */
+   public String id;
+
+   /**
+    * Last known IP address of the client.
+    */
+   public String remoteAddress;
+
+   /**
+    * Last known port number of the client.
+    */
+   public int remotePort;
+
+   /**
+    * Hash containing various headers copied from last request received on this connection. Exposed
+    * headers include: `origin`, `referer` and `x-forwarded-for` (and friends), all lowercase. This
+    * explicitly does not grant access to the `cookie` header, as using it may easily lead to
+    * security issues (for details read the section "Authorisation" at
+    * https://github.com/sockjs/sockjs-node).
+    */
+   public Map<String, String> headers = new HashMap<>();
+
+   /**
+    * The entire url string copied from the last request.
+    */
+   public String url;
+
+   /**
+    * `pathname` from parsed url, for convenience.
+    */
+   public String pathname;
+
+   /**
+    * Prefix of the url on which the request was handled. For SockJsServlet, this is the servlet's
+    * context path
+    */
+   public String prefix;
+
+   /**
+    * Protocol used by the connection. Keep in mind that some protocols are indistinguishable - for
+    * example "xhr-polling" and "xdr-polling".
+    */
+   public String protocol;
 
    public SockJsConnection(Session session) {
       this.session = session;
-      this.id = Utils.uuid();
+      this.id = UUID.randomUUID().toString();
    }
 
    @Override
@@ -113,56 +164,6 @@ public class SockJsConnection {
          onCloseHandler.handle();
       }
    }
-
-   private Session session;
-   private OnDataHandler onDataHandler;
-   private OnCloseHandler onCloseHandler;
-
-   /**
-    * Unique identifier of this connection
-    */
-   public String id;
-
-   /**
-    * Last known IP address of the client.
-    */
-   public String remoteAddress;
-
-   /**
-    * Last known port number of the client.
-    */
-   public int remotePort;
-
-   /**
-    * Hash containing various headers copied from last request received on this connection. Exposed
-    * headers include: `origin`, `referer` and `x-forwarded-for` (and friends), all lowercase. This
-    * explicitly does not grant access to the `cookie` header, as using it may easily lead to
-    * security issues (for details read the section "Authorisation" at
-    * https://github.com/sockjs/sockjs-node).
-    */
-   public Map<String, String> headers = new HashMap<>();
-
-   /**
-    * The entire url string copied from the last request.
-    */
-   public String url;
-
-   /**
-    * `pathname` from parsed url, for convenience.
-    */
-   public String pathname;
-
-   /**
-    * Prefix of the url on which the request was handled. For SockJsServlet, this is the servlet's
-    * context path
-    */
-   public String prefix;
-
-   /**
-    * Protocol used by the connection. Keep in mind that some protocols are indistinguishable - for
-    * example "xhr-polling" and "xdr-polling".
-    */
-   public String protocol;
 
    /**
     * Current state of the connection

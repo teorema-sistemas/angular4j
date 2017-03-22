@@ -66,10 +66,4 @@ public class WebsocketHandler {
          return null;
       }
    };
-
-   public WebsocketHandler(SockJsServer server) {
-      this.server = server;
-   }
-
-   private SockJsServer server;
 }
