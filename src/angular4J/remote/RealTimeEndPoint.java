@@ -69,7 +69,7 @@ public class RealTimeEndPoint extends SockJsServlet {
                public void handle(String message) {
 
                   if (message != null) {
-                     JsonObject jObj = NGParser.getInstance().deserialize(message).getAsJsonObject();
+                     JsonObject jObj = NGParser.parseMessage(message).getAsJsonObject();
 
                      String UID = null;
 

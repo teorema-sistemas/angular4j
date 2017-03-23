@@ -76,6 +76,21 @@ public class InvocationHandler implements Serializable {
       return returns;
    }
 
+   private Class<?> getPrimitiveClass(JsonElement element) {
+      if (element.getAsJsonPrimitive().isBoolean()) {
+         return Boolean.class;
+      }
+
+      if (element.getAsJsonPrimitive().isNumber()) {
+         if (element.getAsString().contains(".")) {
+            return Double.class;
+         }
+         return Long.class;
+      }
+
+      return String.class;
+   }
+
    private Method getMethod(Class<?> clazz, String methodName, int paramSize) {
       for (Method m: clazz.getMethods()) {
          if (m.getName().equals(methodName) && m.getGenericParameterTypes().length == paramSize && !Modifier.isVolatile(m.getModifiers())) {
@@ -83,6 +98,30 @@ public class InvocationHandler implements Serializable {
          }
       }
       return null;
+   }
+
+   private boolean isPrimitiveParseRequired(Class<?> klass) {
+      if (klass.isAssignableFrom(java.util.Date.class)) {
+         return true;
+      }
+
+      if (klass.isAssignableFrom(java.sql.Date.class)) {
+         return true;
+      }
+
+      if (klass.isAssignableFrom(java.sql.Time.class)) {
+         return true;
+      }
+
+      if (klass.isAssignableFrom(java.sql.Timestamp.class)) {
+         return true;
+      }
+
+      if (klass.isAssignableFrom(byte[].class)) {
+         return true;
+      }
+
+      return false;
    }
 
    private Type getParamType(Object service, String id) {
@@ -106,7 +145,7 @@ public class InvocationHandler implements Serializable {
       return null;
    }
 
-   private Type getParamCastType(Object service, Method m, Type param, int paramNumber) {
+   private Type getParamCastType(Object service, Method m, int paramNumber) {
       if (!m.isAnnotationPresent(NGCastIgnore.class)) {
          Annotation[] annotations = m.getParameterAnnotations()[paramNumber];
          for (Annotation ann: annotations) {
@@ -115,7 +154,7 @@ public class InvocationHandler implements Serializable {
             }
          }
       }
-      return param;
+      return null;
    }
 
    private Object castParam(Object service, Type type, JsonElement element) {
@@ -143,10 +182,16 @@ public class InvocationHandler implements Serializable {
 
          Type[] parameters = m.getGenericParameterTypes();
          if (parameters.length == args.size()) {
+
             List<Object> argsValues = new ArrayList<>();
             for (int i = 0; i < parameters.length; i++) {
-               argsValues.add(this.castParam(service, this.getParamCastType(service, m, parameters[i], i), args.get(i)));
+               Type type = this.getParamCastType(service, m, i);
+               if (type == null) {
+                  type = parameters[i];
+               }
+               argsValues.add(this.castParam(service, type, args.get(i)));
             }
+
             try {
                mainReturn = m.invoke(service, argsValues.toArray());
             }
@@ -174,9 +219,9 @@ public class InvocationHandler implements Serializable {
 
       returns.put("mainReturn", mainReturn);
 
-      if (!this.logger.getLogPool().isEmpty()) {
-         returns.put("log", this.logger.getLogPool().toArray());
-         this.logger.getLogPool().clear();
+      if (!logger.getLogPool().isEmpty()) {
+         returns.put("log", logger.getLogPool().toArray());
+         logger.getLogPool().clear();
       }
    }
 
@@ -190,6 +235,6 @@ public class InvocationHandler implements Serializable {
          exceptionString.append(" ").append(cause.getMessage());
       }
 
-      this.logger.log(Level.ERROR, exceptionString.toString());
+      logger.log(Level.ERROR, exceptionString.toString());
    }
 }

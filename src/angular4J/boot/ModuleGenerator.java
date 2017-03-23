@@ -1,17 +1,30 @@
 package angular4J.boot;
 
+import static angular4J.events.Callback.AFTER_SESSION_READY;
+import static angular4J.events.Callback.BEFORE_SESSION_READY;
+
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
+import angular4J.api.CORS;
+import angular4J.api.Eval;
 import angular4J.api.http.Delete;
 import angular4J.api.http.Get;
 import angular4J.api.http.Post;
 import angular4J.api.http.Put;
 import angular4J.api.http.RequestIgnore;
+import angular4J.context.GlobalNGSessionContextsHolder;
+import angular4J.context.NGLocator;
+import angular4J.context.NGSessionScopeContext;
+import angular4J.events.Callback;
 import angular4J.js.cache.JsCache;
 import angular4J.realtime.RealTime;
 import angular4J.util.ClosureCompiler;
+import angular4J.util.CommonUtils;
+import angular4J.util.Constants;
 import angular4J.util.NGObject;
 import angular4J.util.ReflectionUtils;
 
@@ -53,6 +66,9 @@ public class ModuleGenerator implements Serializable {
     */
    public synchronized void generate() {
       if (this.script == null) {
+
+         NGSessionScopeContext.getInstance().setCurrentContext(Constants.GENERATE_SESSION_ID);
+
          this.script = new StringBuilder();
          this.script.append(JsCache.getInstance().getCore());
          StringBuilder beans = new StringBuilder();
@@ -63,6 +79,8 @@ public class ModuleGenerator implements Serializable {
 
          this.script.append(this.compiler.getCompressedJavaScript(beans.toString()));
          this.script.append(JsCache.getInstance().getExtensions().toString());
+
+         GlobalNGSessionContextsHolder.getInstance().destroySession(Constants.GENERATE_SESSION_ID);
       }
    }
 
@@ -74,6 +92,8 @@ public class ModuleGenerator implements Serializable {
     * @return a StringBuilder containing the generated angular service code.
     */
    private StringBuilder generateModel(NGObject model) {
+      Object reference = NGLocator.getInstance().lookup(model.getName(), Constants.GENERATE_SESSION_ID);
+
       StringBuilder builder = new StringBuilder();
       builder.append(";app.factory('").append(model.getName()).append("',function ").append(model.getName()).append("(");
       builder.append("$rootScope, $http, $location,logger,responseHandler,$q");
@@ -81,8 +101,35 @@ public class ModuleGenerator implements Serializable {
       builder.append("var ").append(model.getName()).append("={serviceID:'").append(model.getName()).append("'};");
       builder.append("var rpath=$rootScope.baseUrl+'http/invoke/service/';");
 
-      builder.append(generateStaticPart(model).toString());
+      for (Method m: model.getMethods()) {
+         Annotation ann = ReflectionUtils.getAnnotation(m, Eval.class);
+         if (ann != null) {
 
+            Callback callback = ((Eval) ann).value();
+            try {
+               String execution = (String) m.invoke(reference);
+               StringBuilder js = new StringBuilder();
+
+               if (callback.equals(BEFORE_SESSION_READY)) {
+                  js.append(execution);
+               } else if (callback.equals(AFTER_SESSION_READY)) {
+                  js.append("setTimeout(listen,500);function listen(){if(realtimeManager.ready){");
+                  js.append(execution);
+                  js.append("}else{setTimeout(listen,500);}}");
+               }
+               builder.append(js);
+            }
+            catch (ClassCastException e) {
+               throw new RuntimeException("for bean name: " + model.getName() + " --> an @Eval bloc must return a String");
+            }
+            catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+               e.printStackTrace();
+            }
+
+         }
+      }
+
+      builder.append(generateStaticPart(model).toString());
       builder.append(");");
 
       return builder;
@@ -109,9 +156,17 @@ public class ModuleGenerator implements Serializable {
             continue;
          }
 
+         if (m.isAnnotationPresent(Eval.class)) {
+            continue;
+         }
+
          String httpMethod = null;
+         boolean corsPresent = false;
          boolean realTimePresent = false;
-         if (realTimePresent = ReflectionUtils.isAnnotationPresent(m, RealTime.class)) {
+         if (m.isAnnotationPresent(CORS.class)) {
+            corsPresent = true;
+            httpMethod = "get";
+         } else if (realTimePresent = ReflectionUtils.isAnnotationPresent(m, RealTime.class)) {
             realTimePresent = true;
             httpMethod = "none";
          } else {
@@ -156,7 +211,11 @@ public class ModuleGenerator implements Serializable {
          } else {
             cachedPart.append("return $http.").append(httpMethod).append("(rpath+'").append(model.getName()).append("/").append(m.getName());
 
-            cachedPart.append("/BASE64");
+            if (corsPresent) {
+               cachedPart.append("/CORS");
+            } else {
+               cachedPart.append("/BASE64");
+            }
 
             if (httpMethod.equals("put") || httpMethod.equals("post")) {
                cachedPart.append("',base64Compress(request)");
