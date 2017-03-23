@@ -8,7 +8,6 @@ import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 
-import angular4J.util.Constants;
 import angular4J.util.Pair;
 
 /**
@@ -87,13 +86,5 @@ public class NGSessionScopeContext implements Context, Serializable {
    @Override
    public boolean isActive() {
       return true;
-   }
-
-   public final boolean isScopeSession() {
-      return !this.getCurrentSessionID().equals(Constants.GENERATE_SESSION_ID);
-   }
-
-   public final boolean isGenerateSession() {
-      return this.getCurrentSessionID().equals(Constants.GENERATE_SESSION_ID);
    }
 }

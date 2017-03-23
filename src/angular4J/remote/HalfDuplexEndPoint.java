@@ -169,7 +169,7 @@ public class HalfDuplexEndPoint extends HttpServlet implements Serializable {
          catch (Exception e) {}
       }
 
-      JsonObject paramsObj = NGParser.parseMessage(this.base64Decompress(params)).getAsJsonObject();
+      JsonObject paramsObj = NGParser.getInstance().deserialize(this.base64Decompress(params)).getAsJsonObject();
 
       String UID = this.session.getId();
 
