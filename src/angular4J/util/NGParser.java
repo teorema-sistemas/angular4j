@@ -11,6 +11,8 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.DatatypeConverter;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -185,40 +187,6 @@ public class NGParser implements Serializable {
       return o;
    }
 
-   public Object deserialiseFromString(String value, Class<?> type) {
-      if (value == null) {
-         return null;
-      }
-
-      if (String.class.equals(type)) {
-         return value;
-      }
-
-      if (type.equals(int.class) || type.equals(Integer.class)) {
-         return Integer.parseInt(value);
-      }
-      if (type.equals(float.class) || type.equals(Float.class)) {
-         return Float.parseFloat(value);
-      }
-      if (type.equals(boolean.class) || type.equals(Boolean.class)) {
-         return Boolean.parseBoolean(value);
-      }
-      if (type.equals(double.class) || type.equals(Double.class)) {
-         return Double.parseDouble(value);
-      }
-      if (type.equals(byte.class) || type.equals(Byte.class)) {
-         return Byte.parseByte(value);
-      }
-      if (type.equals(long.class) || type.equals(Long.class)) {
-         return Long.parseLong(value);
-      }
-      if (type.equals(short.class) || type.equals(Short.class)) {
-         return Short.parseShort(value);
-      }
-
-      throw new IllegalArgumentException("unknown primitive type :" + type.getCanonicalName());
-   }
-
    public void initJsonSerialiser() {
       GsonBuilder builder = new GsonBuilder();
 
@@ -248,22 +216,6 @@ public class NGParser implements Serializable {
                return new NGBase64(bytes);
             }
             return null;
-         }
-      });
-
-      builder.registerTypeAdapter(byte[].class, new JsonSerializer<byte[]>(){
-
-         @Override
-         public JsonElement serialize(byte[] src, Type typeOfSrc, JsonSerializationContext context) {
-            return getBase64Json(null, src);
-         }
-      });
-
-      builder.registerTypeAdapter(byte[].class, new JsonDeserializer<byte[]>(){
-
-         @Override
-         public byte[] deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
-            return getBytesFromJson(element);
          }
       });
 
@@ -413,6 +365,291 @@ public class NGParser implements Serializable {
             return null;
          }
 
+      });
+
+      // ---BOOLEAN---
+      builder.registerTypeAdapter(boolean.class, new JsonDeserializer<java.lang.Boolean>(){
+
+         @Override
+         public java.lang.Boolean deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
+
+            try {
+               String value = element.getAsString();
+               if (CommonUtils.isStrValid(value)) {
+                  return Boolean.parseBoolean(value);
+               }
+            }
+            catch (Exception e) {}
+
+            return false;
+         }
+      });
+
+      builder.registerTypeAdapter(java.lang.Boolean.class, new JsonDeserializer<java.lang.Boolean>(){
+
+         @Override
+         public java.lang.Boolean deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
+
+            try {
+               String value = element.getAsString();
+               if (CommonUtils.isStrValid(value)) {
+                  return Boolean.parseBoolean(value);
+               }
+            }
+            catch (Exception e) {}
+
+            return null;
+         }
+      });
+
+      // ---BYTE---
+      builder.registerTypeAdapter(byte.class, new JsonDeserializer<java.lang.Byte>(){
+
+         @Override
+         public java.lang.Byte deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
+
+            try {
+               String value = element.getAsString();
+               if (CommonUtils.isStrValid(value)) {
+                  return Byte.parseByte(value);
+               }
+            }
+            catch (Exception e) {}
+
+            return 0;
+         }
+      });
+
+      builder.registerTypeAdapter(java.lang.Byte.class, new JsonDeserializer<java.lang.Byte>(){
+
+         @Override
+         public java.lang.Byte deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
+
+            try {
+               String value = element.getAsString();
+               if (CommonUtils.isStrValid(value)) {
+                  return Byte.parseByte(value);
+               }
+            }
+            catch (Exception e) {}
+
+            return null;
+         }
+      });
+
+      // ---SHORT---
+      builder.registerTypeAdapter(short.class, new JsonDeserializer<java.lang.Short>(){
+
+         @Override
+         public java.lang.Short deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
+
+            try {
+               String value = element.getAsString();
+               if (CommonUtils.isStrValid(value)) {
+                  return Short.parseShort(value);
+               }
+            }
+            catch (Exception e) {}
+
+            return 0;
+         }
+      });
+
+      builder.registerTypeAdapter(java.lang.Short.class, new JsonDeserializer<java.lang.Short>(){
+
+         @Override
+         public java.lang.Short deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
+
+            try {
+               String value = element.getAsString();
+               if (CommonUtils.isStrValid(value)) {
+                  return Short.parseShort(value);
+               }
+            }
+            catch (Exception e) {}
+
+            return null;
+         }
+      });
+
+      // ---INT---
+      builder.registerTypeAdapter(int.class, new JsonDeserializer<java.lang.Integer>(){
+
+         @Override
+         public java.lang.Integer deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
+
+            try {
+               String value = element.getAsString();
+               if (CommonUtils.isStrValid(value)) {
+                  return Integer.parseInt(value);
+               }
+            }
+            catch (Exception e) {}
+
+            return 0;
+         }
+      });
+
+      builder.registerTypeAdapter(java.lang.Integer.class, new JsonDeserializer<java.lang.Integer>(){
+
+         @Override
+         public java.lang.Integer deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
+
+            try {
+               String value = element.getAsString();
+               if (CommonUtils.isStrValid(value)) {
+                  return Integer.parseInt(value);
+               }
+            }
+            catch (Exception e) {}
+
+            return null;
+         }
+      });
+
+      // ---LONG---
+      builder.registerTypeAdapter(long.class, new JsonDeserializer<java.lang.Long>(){
+
+         @Override
+         public java.lang.Long deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
+
+            try {
+               String value = element.getAsString();
+               if (CommonUtils.isStrValid(value)) {
+                  return Long.parseLong(value);
+               }
+            }
+            catch (Exception e) {}
+
+            return 0l;
+         }
+      });
+
+      builder.registerTypeAdapter(java.lang.Long.class, new JsonDeserializer<java.lang.Long>(){
+
+         @Override
+         public java.lang.Long deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
+
+            try {
+               String value = element.getAsString();
+               if (CommonUtils.isStrValid(value)) {
+                  return Long.parseLong(value);
+               }
+            }
+            catch (Exception e) {}
+
+            return null;
+         }
+      });
+
+      // ---FLOAT---
+      builder.registerTypeAdapter(float.class, new JsonDeserializer<java.lang.Float>(){
+
+         @Override
+         public java.lang.Float deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
+
+            try {
+               String value = element.getAsString();
+               if (CommonUtils.isStrValid(value)) {
+                  return Float.parseFloat(value);
+               }
+            }
+            catch (Exception e) {}
+
+            return 0f;
+         }
+      });
+
+      builder.registerTypeAdapter(java.lang.Float.class, new JsonDeserializer<java.lang.Float>(){
+
+         @Override
+         public java.lang.Float deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
+
+            try {
+               String value = element.getAsString();
+               if (CommonUtils.isStrValid(value)) {
+                  return Float.parseFloat(value);
+               }
+            }
+            catch (Exception e) {}
+
+            return null;
+         }
+      });
+
+      // ---FLOAT---
+      builder.registerTypeAdapter(double.class, new JsonDeserializer<java.lang.Double>(){
+
+         @Override
+         public java.lang.Double deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
+
+            try {
+               String value = element.getAsString();
+               if (CommonUtils.isStrValid(value)) {
+                  return Double.parseDouble(value);
+               }
+            }
+            catch (Exception e) {}
+
+            return 0d;
+         }
+      });
+
+      builder.registerTypeAdapter(java.lang.Double.class, new JsonDeserializer<java.lang.Double>(){
+
+         @Override
+         public java.lang.Double deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
+
+            try {
+               String value = element.getAsString();
+               if (CommonUtils.isStrValid(value)) {
+                  return Double.parseDouble(value);
+               }
+            }
+            catch (Exception e) {}
+
+            return null;
+         }
+      });
+
+      // ---BYTE[]---
+      builder.registerTypeAdapter(byte[].class, new JsonSerializer<byte[]>(){
+
+         @Override
+         public JsonElement serialize(byte[] src, Type typeOfSrc, JsonSerializationContext context) {
+            return getBase64Json(null, src);
+         }
+      });
+
+      builder.registerTypeAdapter(byte[].class, new JsonDeserializer<byte[]>(){
+
+         @Override
+         public byte[] deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
+            return getBytesFromJson(element);
+         }
+      });
+
+      builder.registerTypeAdapter(java.lang.Byte[].class, new JsonSerializer<java.lang.Byte[]>(){
+
+         @Override
+         public JsonElement serialize(java.lang.Byte[] src, Type typeOfSrc, JsonSerializationContext context) {
+            if (src != null) {
+               return getBase64Json(null, ArrayUtils.toPrimitive(src));
+            }
+            return null;
+         }
+      });
+
+      builder.registerTypeAdapter(java.lang.Byte[].class, new JsonDeserializer<java.lang.Byte[]>(){
+
+         @Override
+         public java.lang.Byte[] deserialize(JsonElement element, Type typeOfT, JsonDeserializationContext context) {
+            byte[] bytes = getBytesFromJson(element);
+            if (bytes != null) {
+               return ArrayUtils.toObject(bytes);
+            }
+            return null;
+         }
       });
 
       mainSerializer = builder.create();

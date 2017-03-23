@@ -124,62 +124,6 @@ public class InvocationHandler implements Serializable {
       return false;
    }
 
-   private Object getPrimitiveType(Type param, JsonElement element) {
-      Class<?> klass = null;
-      String typeString = ((param).toString());
-
-      if (typeString.startsWith("class")) {
-         try {
-            klass = Class.forName(typeString.substring(6));
-            if (klass.equals(Object.class)) {
-               klass = this.getPrimitiveClass(element);
-            }
-         }
-         catch (Exception e) {}
-      } else {
-         switch (typeString) {
-            case "int": {
-               klass = Integer.TYPE;
-            }
-               break;
-            case "long": {
-               klass = Long.TYPE;
-            }
-               break;
-            case "double": {
-               klass = Double.TYPE;
-            }
-               break;
-            case "float": {
-               klass = Float.TYPE;
-            }
-               break;
-            case "boolean": {
-               klass = Boolean.TYPE;
-            }
-               break;
-            case "char": {
-               klass = Character.TYPE;
-            }
-               break;
-            case "byte": {
-               klass = Byte.TYPE;
-            }
-               break;
-            case "short": {
-               klass = Short.TYPE;
-            }
-               break;
-         }
-      }
-
-      if (this.isPrimitiveParseRequired(klass)) {
-         return NGParser.getInstance().deserialize(element, klass);
-      } else {
-         return NGParser.getInstance().deserialiseFromString(element.getAsString(), klass);
-      }
-   }
-
    private Type getParamType(Object service, String id) {
       try {
          Field[] fields = service.getClass().getDeclaredFields();
@@ -213,7 +157,7 @@ public class InvocationHandler implements Serializable {
       return null;
    }
 
-   private Object castNGParam(Object service, Type type, JsonElement element) {
+   private Object castParam(Object service, Type type, JsonElement element) {
       if (element.isJsonArray()) {
          return NGParser.getInstance().deserialize(element.getAsJsonArray(), type);
       } else {
@@ -221,17 +165,8 @@ public class InvocationHandler implements Serializable {
       }
    }
 
-   private Object castParam(Object service, Type param, JsonElement element) {
-      if (element.isJsonPrimitive()) {
-         return this.getPrimitiveType(param, element);
-      } else if (element.isJsonArray()) {
-         return NGParser.getInstance().deserialize(element.getAsJsonArray(), param);
-      } else {
-         return NGParser.getInstance().deserialize(element, param);
-      }
-   }
-
-   private void genericInvoke(Object service, String methodName, JsonObject params, Map<String, Object> returns, long reqID, String UID, HttpServletRequest request) throws SecurityException, ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
+   private void genericInvoke(Object service, String methodName, JsonObject params, Map<String, Object> returns, long reqID, String UID, HttpServletRequest request)
+            throws SecurityException, ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
 
       Object mainReturn = null;
       Method m = null;
@@ -251,11 +186,10 @@ public class InvocationHandler implements Serializable {
             List<Object> argsValues = new ArrayList<>();
             for (int i = 0; i < parameters.length; i++) {
                Type type = this.getParamCastType(service, m, i);
-               if (type != null) {
-                  argsValues.add(this.castNGParam(service, type, args.get(i)));
-               } else {
-                  argsValues.add(this.castParam(service, parameters[i], args.get(i)));
+               if (type == null) {
+                  type = parameters[i];
                }
+               argsValues.add(this.castParam(service, type, args.get(i)));
             }
 
             try {
