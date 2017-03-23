@@ -18,12 +18,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-import angular4J.events.NGEvent;
 import angular4J.io.ByteArrayCache;
 
 /**
@@ -33,25 +31,13 @@ import angular4J.io.ByteArrayCache;
 public class NGParser implements Serializable {
 
    private NGParser() {
-      this.initJsonSerialiser();
+      this.initJson();
    }
 
    private static NGParser instance;
 
    private transient Gson mainSerializer;
    private HttpServletRequest request;
-
-   public static JsonElement parseMessage(String message) {
-      if (message == null) {
-         return null;
-      }
-      if (!message.startsWith("{")) {
-         return new JsonPrimitive(message);
-      }
-      JsonParser parser = new JsonParser();
-
-      return parser.parse(message);
-   }
 
    private static final void createInstance() {
       instance = new NGParser();
@@ -149,6 +135,10 @@ public class NGParser implements Serializable {
       return mainSerializer.toJson(object);
    }
 
+   public JsonElement deserialize(String json) {
+      return (JsonElement) this.deserialize(json, JsonElement.class);
+   }
+
    public Object deserialize(JsonElement element, Type type) {
       return mainSerializer.fromJson(element, type);
    }
@@ -157,37 +147,7 @@ public class NGParser implements Serializable {
       return mainSerializer.fromJson(json, type);
    }
 
-   public Object convertEvent(NGEvent event) throws ClassNotFoundException {
-
-      JsonElement element = parseMessage(event.getData());
-
-      JsonElement data;
-      Class<?> javaClass;
-
-      try {
-         data = element.getAsJsonObject();
-
-         javaClass = Class.forName(event.getDataClass());
-      }
-      catch (Exception e) {
-         data = element.getAsJsonPrimitive();
-         if (event.getDataClass() == null) {
-            event.setDataClass("String");
-         }
-         javaClass = Class.forName("java.lang." + event.getDataClass());
-
-      }
-
-      Object o;
-      if (javaClass.equals(String.class)) {
-         o = data.toString().substring(1, data.toString().length() - 1);
-      } else {
-         o = deserialize(data, javaClass);
-      }
-      return o;
-   }
-
-   public void initJsonSerialiser() {
+   public void initJson() {
       GsonBuilder builder = new GsonBuilder();
 
       builder.serializeNulls();
@@ -196,6 +156,7 @@ public class NGParser implements Serializable {
 
       builder.registerTypeAdapter(NGLob.class, new ByteArrayJsonAdapter());
 
+      // ---NGBASE64---
       builder.registerTypeAdapter(NGBase64.class, new JsonSerializer<NGBase64>(){
 
          @Override
@@ -219,6 +180,7 @@ public class NGParser implements Serializable {
          }
       });
 
+      // ---DATES---
       final SimpleDateFormat dateFormat = new SimpleDateFormat("'" + Constants.DATA_MARK + Constants.DATE_UTC_MARK + "'yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
       if (dateFormat != null && NGConfig.getProperty("TIME_ZONE") != null) {
@@ -652,6 +614,6 @@ public class NGParser implements Serializable {
          }
       });
 
-      mainSerializer = builder.create();
+      this.mainSerializer = builder.create();
    }
 }
