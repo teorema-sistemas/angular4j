@@ -64,11 +64,6 @@ public class TeamModelView extends GenericModelView {
    }
 
    @Override
-   protected Class<?> getNgClassCast() {
-      return null;
-   }
-
-   @Override
    public Info reload() {
       return null;
    }
