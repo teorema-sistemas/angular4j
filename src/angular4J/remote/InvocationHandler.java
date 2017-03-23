@@ -76,21 +76,6 @@ public class InvocationHandler implements Serializable {
       return returns;
    }
 
-   private Class<?> getPrimitiveClass(JsonElement element) {
-      if (element.getAsJsonPrimitive().isBoolean()) {
-         return Boolean.class;
-      }
-
-      if (element.getAsJsonPrimitive().isNumber()) {
-         if (element.getAsString().contains(".")) {
-            return Double.class;
-         }
-         return Long.class;
-      }
-
-      return String.class;
-   }
-
    private Method getMethod(Class<?> clazz, String methodName, int paramSize) {
       for (Method m: clazz.getMethods()) {
          if (m.getName().equals(methodName) && m.getGenericParameterTypes().length == paramSize && !Modifier.isVolatile(m.getModifiers())) {
@@ -98,86 +83,6 @@ public class InvocationHandler implements Serializable {
          }
       }
       return null;
-   }
-
-   private boolean isPrimitiveParseRequired(Class<?> klass) {
-      if (klass.isAssignableFrom(java.util.Date.class)) {
-         return true;
-      }
-
-      if (klass.isAssignableFrom(java.sql.Date.class)) {
-         return true;
-      }
-
-      if (klass.isAssignableFrom(java.sql.Time.class)) {
-         return true;
-      }
-
-      if (klass.isAssignableFrom(java.sql.Timestamp.class)) {
-         return true;
-      }
-
-      if (klass.isAssignableFrom(byte[].class)) {
-         return true;
-      }
-
-      return false;
-   }
-
-   private Object getPrimitiveType(Type param, JsonElement element) {
-      Class<?> klass = null;
-      String typeString = ((param).toString());
-
-      if (typeString.startsWith("class")) {
-         try {
-            klass = Class.forName(typeString.substring(6));
-            if (klass.equals(Object.class)) {
-               klass = this.getPrimitiveClass(element);
-            }
-         }
-         catch (Exception e) {}
-      } else {
-         switch (typeString) {
-            case "int": {
-               klass = Integer.TYPE;
-            }
-               break;
-            case "long": {
-               klass = Long.TYPE;
-            }
-               break;
-            case "double": {
-               klass = Double.TYPE;
-            }
-               break;
-            case "float": {
-               klass = Float.TYPE;
-            }
-               break;
-            case "boolean": {
-               klass = Boolean.TYPE;
-            }
-               break;
-            case "char": {
-               klass = Character.TYPE;
-            }
-               break;
-            case "byte": {
-               klass = Byte.TYPE;
-            }
-               break;
-            case "short": {
-               klass = Short.TYPE;
-            }
-               break;
-         }
-      }
-
-      if (this.isPrimitiveParseRequired(klass)) {
-         return NGParser.getInstance().deserialize(element, klass);
-      } else {
-         return NGParser.getInstance().deserialiseFromString(element.getAsString(), klass);
-      }
    }
 
    private Type getParamType(Object service, String id) {
@@ -201,7 +106,7 @@ public class InvocationHandler implements Serializable {
       return null;
    }
 
-   private Type getParamCastType(Object service, Method m, int paramNumber) {
+   private Type getParamCastType(Object service, Method m, Type param, int paramNumber) {
       if (!m.isAnnotationPresent(NGCastIgnore.class)) {
          Annotation[] annotations = m.getParameterAnnotations()[paramNumber];
          for (Annotation ann: annotations) {
@@ -210,10 +115,10 @@ public class InvocationHandler implements Serializable {
             }
          }
       }
-      return null;
+      return param;
    }
 
-   private Object castNGParam(Object service, Type type, JsonElement element) {
+   private Object castParam(Object service, Type type, JsonElement element) {
       if (element.isJsonArray()) {
          return NGParser.getInstance().deserialize(element.getAsJsonArray(), type);
       } else {
@@ -221,17 +126,8 @@ public class InvocationHandler implements Serializable {
       }
    }
 
-   private Object castParam(Object service, Type param, JsonElement element) {
-      if (element.isJsonPrimitive()) {
-         return this.getPrimitiveType(param, element);
-      } else if (element.isJsonArray()) {
-         return NGParser.getInstance().deserialize(element.getAsJsonArray(), param);
-      } else {
-         return NGParser.getInstance().deserialize(element, param);
-      }
-   }
-
-   private void genericInvoke(Object service, String methodName, JsonObject params, Map<String, Object> returns, long reqID, String UID, HttpServletRequest request) throws SecurityException, ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
+   private void genericInvoke(Object service, String methodName, JsonObject params, Map<String, Object> returns, long reqID, String UID, HttpServletRequest request)
+            throws SecurityException, ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
 
       Object mainReturn = null;
       Method m = null;
@@ -247,17 +143,10 @@ public class InvocationHandler implements Serializable {
 
          Type[] parameters = m.getGenericParameterTypes();
          if (parameters.length == args.size()) {
-
             List<Object> argsValues = new ArrayList<>();
             for (int i = 0; i < parameters.length; i++) {
-               Type type = this.getParamCastType(service, m, i);
-               if (type != null) {
-                  argsValues.add(this.castNGParam(service, type, args.get(i)));
-               } else {
-                  argsValues.add(this.castParam(service, parameters[i], args.get(i)));
-               }
+               argsValues.add(this.castParam(service, this.getParamCastType(service, m, parameters[i], i), args.get(i)));
             }
-
             try {
                mainReturn = m.invoke(service, argsValues.toArray());
             }
@@ -285,9 +174,9 @@ public class InvocationHandler implements Serializable {
 
       returns.put("mainReturn", mainReturn);
 
-      if (!logger.getLogPool().isEmpty()) {
-         returns.put("log", logger.getLogPool().toArray());
-         logger.getLogPool().clear();
+      if (!this.logger.getLogPool().isEmpty()) {
+         returns.put("log", this.logger.getLogPool().toArray());
+         this.logger.getLogPool().clear();
       }
    }
 
@@ -301,6 +190,6 @@ public class InvocationHandler implements Serializable {
          exceptionString.append(" ").append(cause.getMessage());
       }
 
-      logger.log(Level.ERROR, exceptionString.toString());
+      this.logger.log(Level.ERROR, exceptionString.toString());
    }
 }
