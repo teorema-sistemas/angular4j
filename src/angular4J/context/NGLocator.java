@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 
-import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.spi.Context;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.spi.Bean;
@@ -38,7 +37,7 @@ public class NGLocator implements Serializable {
       return instance;
    }
 
-   public Object lookup(String beanName, String sessionID) {
+   public synchronized Object lookup(String beanName, String sessionID) {
       NGSessionScopeContext.getInstance().setCurrentContext(sessionID);
 
       Class<?> beanClass = NGHolder.getInstance().getClass(beanName);
@@ -49,17 +48,12 @@ public class NGLocator implements Serializable {
 
       Bean bean = this.beanManager.resolve(beans);
       Class<?> scopeAnnotationClass = bean.getScope();
-      Context context;
-      if (scopeAnnotationClass.equals(RequestScoped.class)) {
-         context = this.beanManager.getContext((Class<? extends Annotation>) scopeAnnotationClass);
-         if (context == null) return bean.create(this.beanManager.createCreationalContext(bean));
 
+      Context context = null;
+      if (scopeAnnotationClass.equals(NGSessionScoped.class)) {
+         context = NGSessionScopeContext.getInstance();
       } else {
-         if (scopeAnnotationClass.equals(NGSessionScopeContext.class)) {
-            context = NGSessionScopeContext.getInstance();
-         } else {
-            context = this.beanManager.getContext((Class<? extends Annotation>) scopeAnnotationClass);
-         }
+         context = this.beanManager.getContext((Class<? extends Annotation>) scopeAnnotationClass);
       }
 
       return context.get(bean, this.beanManager.createCreationalContext(bean));

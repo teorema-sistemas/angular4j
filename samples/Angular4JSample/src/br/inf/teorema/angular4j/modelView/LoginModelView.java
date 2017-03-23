@@ -6,7 +6,6 @@ import angular4J.api.http.Put;
 import angular4J.api.http.RequestIgnore;
 import angular4J.context.NGSessionScopeContext;
 import angular4J.context.NGSessionScoped;
-import br.inf.teorema.angular4j.model.GenericBean;
 import br.inf.teorema.angular4j.model.Info;
 import br.inf.teorema.angular4j.model.User;
 import br.inf.teorema.angular4j.singleton.SystemControl;
@@ -14,11 +13,6 @@ import br.inf.teorema.angular4j.singleton.SystemControl;
 @Angular4J
 @NGSessionScoped
 public class LoginModelView extends GenericModelView<User> {
-
-   @Override
-   protected Class<?> getNgClassCast() {
-      return GenericBean.class;
-   }
 
    @Put
    public User authenticate(String email, String password) {
