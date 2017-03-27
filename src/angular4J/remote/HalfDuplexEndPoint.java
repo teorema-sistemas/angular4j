@@ -131,16 +131,6 @@ public class HalfDuplexEndPoint extends HttpServlet implements Serializable {
 
       resp.setCharacterEncoding("UTF-8");
 
-      if (request.getRequestURL().toString().endsWith("/CORS")) {
-         resp.addHeader("Access-Control-Allow-Origin", "*");
-         resp.addHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE");
-         resp.addHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-      }
-
-      if (request.getMethod().equals("OPTIONS")) {
-         resp.setStatus(HttpServletResponse.SC_OK);
-      }
-
       resp.setContentType("application/text");
 
       String fullPath = request.getRequestURI();

@@ -1,10 +1,8 @@
 package angular4J.boot;
 
 import java.io.IOException;
-import java.util.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -23,9 +21,6 @@ import angular4J.realtime.GlobalConnectionHolder;
 @ApplicationScoped
 @WebServlet(loadOnStartup = 1, urlPatterns = "/ng4j.js")
 public final class BootServlet extends HttpServlet {
-
-   @Inject
-   Logger log;
 
    @Override
    public void init() throws ServletException {
