@@ -1,3 +1,45 @@
+function request(http, $q, responseHandler, realtimeManager, rpath, httpMethod, model, modelName, methodName, args){
+	var params = {
+		"args" : args
+	};
+    var request = angular.copy(params);
+    revertObjects(request);
+
+    switch(httpMethod){
+    	case 1:
+    	case 4:
+    		return http[resolveHttp(httpMethod)](rpath + modelName + "/" + methodName + "/BASE64?params\x3d" + encodeURIComponent(base64Compress(angular.toJson(request)))).then(function(response) {
+    			return responseHandler.handleResponse(generateJson(response.data), model, true);
+    		}, function(response) {
+		        return $q.reject(response.data);
+		    });
+
+		case 2:    	
+    	case 3:
+    		return http[resolveHttp(httpMethod)](rpath + modelName + "/" + methodName + "/BASE64", base64Compress(request)).then(function(response) {
+    			return responseHandler.handleResponse(generateJson(response.data), model, true);
+    		}, function(response) {
+		        return $q.reject(response.data);
+		    });
+    	
+		case 5:
+			return realtimeManager.call(model, modelName + "." + methodName,request).then(function(response){
+				return responseHandler.handleResponse(response, model, true);
+			} ,function(response){
+				return $q.reject(response.data);
+			});
+    }
+
+    function resolveHttp(httpMethod){
+    	switch(httpMethod){
+    		case 1: return "get";
+	    	case 2: return "put";
+			case 3: return "post";
+	    	case 4: return "delete";
+    	}
+    }
+}
+
 function bytesToString(bytes) {
 	  var result = "";
 	  for (var i = 0; i < bytes.length; i++) {

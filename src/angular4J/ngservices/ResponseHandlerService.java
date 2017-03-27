@@ -16,10 +16,6 @@ public class ResponseHandlerService implements NGService {
       result.append("this.handleResponse=function(msg,caller,isRPC){");
       result.append("var mainReturn={};");
       result.append("for (var key in msg) {");
-      result.append("if(key==='rootScope'){");
-      result.append("for(var model in msg[key]){");
-      result.append("$rootScope[model]=msg['rootScope'][model];");
-      result.append("}}");
       result.append("if((key==='zadd')||(key==='rm')||(key==='rm-k')){");
       result.append("var equalsKey='--';");
       result.append("for(var modelkey in msg[key]){");
@@ -51,13 +47,9 @@ public class ResponseHandlerService implements NGService {
       result.append("caller[key]=msg[key];");
       result.append("}");
       result.append("if ((key==='mainReturn')&&(msg[key])){");
-      result.append("if(msg[key].hasOwnProperty('boundTo')){");
-      result.append("mainReturn=msg[msg[key].boundTo];");
-      result.append("}else{");
-      result.append("mainReturn=msg[key];}}");
+      result.append("mainReturn=msg[key];}");
       result.append("}");
-      result.append("if(!$rootScope.$$phase) {$rootScope. $digest ;$rootScope.$apply();}");
-      result.append("if(!isRPC){$rootScope. $digest ;$rootScope.$apply();}");
+      result.append("if(!isRPC || !$rootScope.$$phase) {$rootScope. $digest ;$rootScope.$apply();}");
       result.append("if(msg.log){logger.log(msg.log);}");
       result.append("return mainReturn;");
       result.append("};}]);");

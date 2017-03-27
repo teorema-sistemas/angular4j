@@ -109,24 +109,18 @@ public class ModuleGenerator implements Serializable {
             continue;
          }
 
-         String httpMethod = null;
-         boolean realTimePresent = false;
-         if (realTimePresent = ReflectionUtils.isAnnotationPresent(m, RealTime.class)) {
-            realTimePresent = true;
-            httpMethod = "none";
+         Byte httpMethod = null;
+         if (ReflectionUtils.isAnnotationPresent(m, Get.class)) {
+            httpMethod = 1;
+         } else if (ReflectionUtils.isAnnotationPresent(m, Put.class)) {
+            httpMethod = 2;
+         } else if (ReflectionUtils.isAnnotationPresent(m, Post.class)) {
+            httpMethod = 3;
+         } else if (ReflectionUtils.isAnnotationPresent(m, Delete.class)) {
+            httpMethod = 4;
+         } else if (ReflectionUtils.isAnnotationPresent(m, RealTime.class)) {
+            httpMethod = 5;
          } else {
-            if (ReflectionUtils.isAnnotationPresent(m, Get.class)) {
-               httpMethod = "get";
-            } else if (ReflectionUtils.isAnnotationPresent(m, Post.class)) {
-               httpMethod = "post";
-            } else if (ReflectionUtils.isAnnotationPresent(m, Put.class)) {
-               httpMethod = "put";
-            } else if (ReflectionUtils.isAnnotationPresent(m, Delete.class)) {
-               httpMethod = "_delete";
-            }
-         }
-
-         if (httpMethod == null) {
             continue;
          }
 
@@ -142,36 +136,15 @@ public class ModuleGenerator implements Serializable {
             cachedPart.append(argsString.substring(0, argsString.length() - 1));
          }
 
-         cachedPart.append("){").append("var mainReturn={data:{}};").append("var params={};");
+         cachedPart.append("){");
+
+         cachedPart.append("return request($http,$q,responseHandler,realtimeManager,rpath,");
+         cachedPart.append(httpMethod.toString()).append(",");
+         cachedPart.append(model.getName()).append(",");
+         cachedPart.append("\"").append(model.getName()).append("\",");
+         cachedPart.append("\"").append(m.getName()).append("\"");
          cachedPart.append(addParams(m, parameters));
-         cachedPart.append("var request = angular.copy(params);");
-         cachedPart.append("revertObjects(request);");
-         if (realTimePresent) {
-            cachedPart.append("return realtimeManager.call(").append(model.getName()).append(",'").append(model.getName()).append(".").append(m.getName()).append("',request");
-            cachedPart.append(").then(function(response){");
-            cachedPart.append("var msg=(response);");
-            cachedPart.append("mainReturn.data= responseHandler.handleResponse(msg,").append(model.getName()).append(",true);");
-            cachedPart.append("return mainReturn.data;");
-            cachedPart.append("} ,function(response){return $q.reject(response.data);});");
-         } else {
-            cachedPart.append("return $http.").append(httpMethod).append("(rpath+'").append(model.getName()).append("/").append(m.getName());
-
-            cachedPart.append("/BASE64");
-
-            if (httpMethod.equals("put") || httpMethod.equals("post")) {
-               cachedPart.append("',base64Compress(request)");
-            } else {
-               String paramsQuery = ("?params='+encodeURIComponent(base64Compress(angular.toJson(request)))");
-               cachedPart.append(paramsQuery);
-            }
-
-            cachedPart.append(").then(function(response) {");
-            cachedPart.append("response.data = generateJson(response.data);");
-            cachedPart.append("var msg=response.data;");
-            cachedPart.append("mainReturn.data= responseHandler.handleResponse(msg,").append(model.getName()).append(",true);");
-            cachedPart.append("return mainReturn.data;");
-            cachedPart.append("} ,function(response){return $q.reject(response.data);});");
-         }
+         cachedPart.append(");");
 
          cachedPart.append("});");
       }
@@ -191,7 +164,7 @@ public class ModuleGenerator implements Serializable {
             argsString.append("arg").append(i).append(",");
          }
          argsString = new StringBuilder(argsString.substring(0, argsString.length() - 1));
-         sb.append("params['args']=[").append(argsString).append("];");
+         sb.append(",[").append(argsString).append("]");
       }
 
       return sb;

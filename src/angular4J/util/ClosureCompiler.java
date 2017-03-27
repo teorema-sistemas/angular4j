@@ -9,8 +9,7 @@ import com.google.javascript.jscomp.SourceFile;
 import com.google.javascript.jscomp.VariableRenamingPolicy;
 
 /**
- * A closure compiler utility class used buy Angular4J to "minify" the generated ng4j.js
- * script
+ * A closure compiler utility class used buy Angular4J to "minify" the generated ng4j.js script
  */
 public final class ClosureCompiler {
 
@@ -43,7 +42,7 @@ public final class ClosureCompiler {
          logger.warning("could not compress JS, compression disabled, check for error or your guava library version. Cause:" + e.getMessage());
       }
 
-      return compiled.replace("_delete", "delete");
+      return compiled;
    }
 
    public String compile(String code) {
